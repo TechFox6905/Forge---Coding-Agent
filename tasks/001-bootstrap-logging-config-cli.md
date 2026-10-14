@@ -1,7 +1,7 @@
 ---
 id: 001-bootstrap-logging-config-cli
 feature: m1-vanilla-agent
-status: pending
+status: done
 ---
 
 # Bootstrap: logging, settings, CLI, entities
