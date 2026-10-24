@@ -25,6 +25,7 @@ dependencies = [
     "click>=8.1",
     "rich>=13",
     "prompt-toolkit>=3",
+    "pydantic-ai>=1.107.0",
 ]
 
 [project.scripts]
