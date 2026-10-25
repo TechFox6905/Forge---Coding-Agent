@@ -144,11 +144,12 @@ async def test_timeout_kills_a_child_the_command_spawned(tmp_path: Path):
     """
     sentinel = tmp_path / "child-alive.log"
 
-    # The child writes to the sentinel until it is terminated. repr() safely embeds the
-    # filesystem path inside Python code, including Windows backslashes.
+    # Forward slashes avoid Python interpreting Windows path components as escape sequences.
+    sentinel_path = sentinel.as_posix()
+
     child_code = (
-        "import pathlib, time; "
-        f"f = open({str(sentinel)!r}, 'a'); "
+        "import time; "
+        f"f = open({sentinel_path!r}, 'a'); "
         'exec("while True:\\n'
         " f.write('tick\\\\n'); f.flush(); "
         ' time.sleep(0.05)")'
@@ -162,8 +163,6 @@ async def test_timeout_kills_a_child_the_command_spawned(tmp_path: Path):
     assert result.timed_out is True
 
     size_at_kill = sentinel.stat().st_size if sentinel.exists() else 0
-    # The child wrote every 50ms; wait well past several intervals. A surviving orphan would
-    # grow the file; a correctly killed group leaves it frozen.
     await asyncio.sleep(0.5)
     size_after = sentinel.stat().st_size if sentinel.exists() else 0
 
