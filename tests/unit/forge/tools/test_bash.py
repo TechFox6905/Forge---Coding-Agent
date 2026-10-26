@@ -165,13 +165,17 @@ async def test_bash_timeout_kills_a_spawned_child(tmp_path: Path):
     # Use forward slashes so the Windows path is valid inside the Python -c string.
     sentinel_path = sentinel.as_posix()
 
-    child_code = (
-        "import time; "
-        f"f = open({sentinel_path!r}, 'a'); "
-        'exec("while True:\\n'
-        " f.write('tick\\\\n'); f.flush(); "
-        ' time.sleep(0.05)")'
+    loop_code = "\n".join(
+        [
+            "while True:",
+            "    f.write('tick' + chr(10))",
+            "    f.flush()",
+            "    time.sleep(0.05)",
+        ]
     )
+
+    child_code = f"import time; f = open({sentinel_path!r}, 'a'); exec({loop_code!r})"
+
     command = f"{_python_command(child_code)} & wait"
 
     out = await bash_module.bash(_ctx(tmp_path), command=command, timeout=0.2)

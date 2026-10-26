@@ -147,13 +147,16 @@ async def test_timeout_kills_a_child_the_command_spawned(tmp_path: Path):
     # Forward slashes avoid Python interpreting Windows path components as escape sequences.
     sentinel_path = sentinel.as_posix()
 
-    child_code = (
-        "import time; "
-        f"f = open({sentinel_path!r}, 'a'); "
-        'exec("while True:\\n'
-        " f.write('tick\\\\n'); f.flush(); "
-        ' time.sleep(0.05)")'
+    loop_code = "\n".join(
+        [
+            "while True:",
+            "    f.write('tick' + chr(10))",
+            "    f.flush()",
+            "    time.sleep(0.05)",
+        ]
     )
+
+    child_code = f"import time; f = open({sentinel_path!r}, 'a'); exec({loop_code!r})"
 
     # Background the child so the parent shell returns control to the group; the group is what
     # the executor kills on timeout. `wait` keeps the parent alive past the deadline.
