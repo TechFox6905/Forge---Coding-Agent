@@ -1,7 +1,7 @@
 ---
 id: 010-tools-web-fetch
 feature: m1-vanilla-agent
-status: pending
+status: done
 ---
 
 # Tools: web fetch (HTML→Markdown)
@@ -10,10 +10,10 @@ status: pending
 A simple HTTP GET tool that converts HTML to Markdown to cut tokens (validated against claude-code's WebFetch).
 
 ## Acceptance criteria
-- [ ] `tools/web.py` `web_fetch(url)` uses `httpx.AsyncClient` GET, converts HTML→Markdown, returns text.
-- [ ] Size-capped; `settings.web_fetch_timeout_s` enforced.
-- [ ] Network is mocked in tests (no real requests under `filterwarnings=["error"]`).
-- [ ] Gated.
+- [x] `tools/web.py` `web_fetch(url)` uses `httpx.AsyncClient` GET, converts HTML→Markdown, returns text.
+- [x] Size-capped; `settings.web_fetch_timeout_s` enforced.
+- [x] Network is mocked in tests (no real requests under `filterwarnings=["error"]`).
+- [x] Gated.
 
 ## Out of scope
 - WebSearch; response caching; readability/boilerplate stripping beyond Markdown conversion.

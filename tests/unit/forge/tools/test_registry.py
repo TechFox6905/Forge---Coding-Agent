@@ -26,7 +26,17 @@ def _agent(mocker):
 
 def test_registry_lists_the_expected_tools():
     names = {spec.name for spec in TOOL_SPECS}
-    assert names == {"noop", "read", "glob", "grep", "write", "edit", "bash", "todo_write"}
+    assert names == {
+        "noop",
+        "read",
+        "glob",
+        "grep",
+        "write",
+        "edit",
+        "bash",
+        "todo_write",
+        "web_fetch",
+    }
 
 
 def test_read_only_flags_match_each_spec():
@@ -43,6 +53,8 @@ def test_read_only_flags_match_each_spec():
     assert by_name["bash"].read_only is False
     # todo_write has session side effects (it rewrites the task store): NOT read-only.
     assert by_name["todo_write"].read_only is False
+    # web_fetch has no local side effect (network egress only): tagged read-only, still asked.
+    assert by_name["web_fetch"].read_only is True
 
 
 def test_is_read_only_reflects_the_registered_flags():
@@ -55,6 +67,8 @@ def test_is_read_only_reflects_the_registered_flags():
     assert is_read_only("edit") is False
     assert is_read_only("bash") is False
     assert is_read_only("todo_write") is False
+    # web_fetch is tagged read-only (no local side effect); still asked in v1.
+    assert is_read_only("web_fetch") is True
     # Unknown tools default to mutating (gated).
     assert is_read_only("does-not-exist") is False
 
@@ -64,7 +78,17 @@ def test_register_tools_registers_every_spec_on_the_agent(mocker):
 
     # build_agent already registers via the registry; the tools must be on the agent.
     registered = set(agent._function_toolset.tools)
-    assert {"noop", "read", "glob", "grep", "write", "edit", "bash", "todo_write"} <= registered
+    assert {
+        "noop",
+        "read",
+        "glob",
+        "grep",
+        "write",
+        "edit",
+        "bash",
+        "todo_write",
+        "web_fetch",
+    } <= registered
 
 
 def test_register_tools_registers_every_spec_onto_a_bare_agent():
