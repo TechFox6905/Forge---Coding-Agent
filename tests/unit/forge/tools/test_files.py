@@ -32,6 +32,7 @@ from forge.entities.permissions import PermissionDecision, PermissionRequest
 from forge.harness.runner import TurnContext
 from forge.permissions.gate import PermissionGate
 from forge.tools import files
+from forge.tools.askuser import deny_user_question_resolver
 
 
 async def _deny_resolver(request: PermissionRequest) -> PermissionDecision:
@@ -44,6 +45,7 @@ def _ctx(cwd: Path, *, approved: bool = True) -> RunContext[AgentDeps]:
         emit=lambda _e: None,
         gate=PermissionGate(),
         resolve_permission=_deny_resolver,
+        resolve_user_question=deny_user_question_resolver,
     )
     return RunContext(deps=deps, model=None, usage=None, tool_call_approved=approved)  # type: ignore[arg-type]
 
@@ -662,6 +664,7 @@ async def test_write_runs_through_the_agent_when_approved(tmp_path: Path, mocker
         emit=emitted.append,
         gate=PermissionGate(),
         resolve_permission=approving_resolver,
+        resolve_user_question=deny_user_question_resolver,
     )
     agent = _agent(mocker)
     handler = AgentTurnHandler(agent, deps=deps)
@@ -694,6 +697,7 @@ async def test_edit_runs_through_the_agent_when_approved(tmp_path: Path, mocker)
         emit=emitted.append,
         gate=PermissionGate(),
         resolve_permission=approving_resolver,
+        resolve_user_question=deny_user_question_resolver,
     )
     agent = _agent(mocker)
     handler = AgentTurnHandler(agent, deps=deps)

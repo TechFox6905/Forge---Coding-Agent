@@ -29,6 +29,7 @@ from forge.entities.task import Task
 from forge.harness.runner import Boundary, TurnContext
 from forge.permissions.gate import PermissionGate
 from forge.tools import tasks as tasks_module
+from forge.tools.askuser import deny_user_question_resolver
 
 
 async def _deny_resolver(request: PermissionRequest) -> PermissionDecision:
@@ -41,6 +42,7 @@ def _deps(*, emit=None, task_store: list[Task] | None = None) -> AgentDeps:
         emit=emit if emit is not None else (lambda _e: None),
         gate=PermissionGate(),
         resolve_permission=_deny_resolver,
+        resolve_user_question=deny_user_question_resolver,
         task_store=task_store if task_store is not None else [],
     )
 
@@ -159,6 +161,7 @@ async def test_todo_write_runs_through_a_real_agent_when_approved(mocker):
         emit=emitted.append,
         gate=PermissionGate(),
         resolve_permission=approving_resolver,
+        resolve_user_question=deny_user_question_resolver,
         task_store=[],
     )
     handler = AgentTurnHandler(agent, deps=deps)
