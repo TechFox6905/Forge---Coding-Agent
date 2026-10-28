@@ -1,105 +1,91 @@
 # Forge
 
-**Forge** is a terminal-based AI coding agent built around an agentic harness. It is designed to combine LLM-driven reasoning with tools for file operations, shell execution, web access, and Model Context Protocol (MCP) integrations.
+**Forge** is a terminal **coding agent** you run in your terminal — a [Pydantic AI](https://ai.pydantic.dev) ReAct loop on **Gemini**, driving file / bash / web tools behind a `prompt_toolkit` + `Rich` TUI, with an ask-before-every-tool permission gate, project memory, and replayable sessions.
 
-The project aims to bring together agent orchestration, pluggable inference providers, sandboxed execution, and observability in a single Python application.
+This repository is an **educational, open-source course** that builds `forge` from scratch, step by step. It is a single Python package (`forge`); each module under `src/forge/` maps to one part of the architecture.
 
-## Architecture
+> **Status — Milestone 1 (vanilla on-device agent).** What's built today: the agent loop on Gemini, the steering TUI, the core tools, the permission gate, memory, and a session log. Later milestones add more inference providers (OpenRouter / Modal), sandboxing, observability (Opik), a durability runtime (Kitaru), and MCP — see [`AGENTS.md`](AGENTS.md) and the architecture decision in [`docs/adr/0002-milestone-1-vanilla-agent-architecture.md`](docs/adr/0002-milestone-1-vanilla-agent-architecture.md).
 
-Forge is organized as a single Python package, with application code under `src/forge/`. Each module is responsible for a distinct part of the system.
+## Requirements
 
-The intended architecture includes:
+- **[uv](https://docs.astral.sh/uv/)** — the package/runtime manager (`curl -LsSf https://astral.sh/uv/install.sh | sh`). uv installs the pinned Python 3.12 for you.
+- A **Gemini API key** ([Google AI Studio](https://aistudio.google.com/apikey) — there's a free tier).
 
-* **Agent orchestration:** A Pydantic AI-powered ReAct loop for reasoning and tool execution.
-* **Terminal interface:** An interactive TUI built with `prompt_toolkit` and `Rich`.
-* **Tool integration:** File operations, shell commands, web access, and MCP tools.
-* **Inference:** Support for Gemini, OpenRouter, and Modal-hosted models.
-* **Sandboxing:** Local and remote environments for executing commands.
-* **Observability:** Opik-based tracing and evaluation.
-* **Durability:** A Kitaru-based runtime for durable execution and workflow management.
-
-These components will be implemented incrementally as the project develops.
-
-## Tech Stack
-
-| Component                         | Technology                  |
-| --------------------------------- | --------------------------- |
-| Language                          | Python 3.12+                |
-| Package management                | uv                          |
-| Build system                      | Hatchling                   |
-| CLI                               | Click                       |
-| Terminal UI                       | prompt_toolkit, Rich        |
-| Data validation and configuration | Pydantic, pydantic-settings |
-| Linting and formatting            | Ruff                        |
-| Testing                           | pytest, pytest-asyncio      |
-| Agent framework                   | Pydantic AI                 |
-
-Additional integrations will be introduced as their corresponding components are implemented.
-
-## Getting Started
-
-### Prerequisites
-
-* Python 3.12 or later
-* [uv](https://docs.astral.sh/uv/)
-
-### Installation
-
-Clone the repository and navigate to the project directory.
-
-Install the project dependencies and development tools:
+## Install
 
 ```bash
-make install
+git clone git@github.com:TechFox6905/example-repo.git
+cd example-repo
+make install        # uv sync + wire git hooks   (or just: uv sync)
 ```
 
-### Development
+### Run `forge` from anywhere (optional)
 
-Run the test suite:
+`make install` lets you run the agent with `uv run forge`. To type just **`forge`** from any directory, put it on your PATH:
 
 ```bash
-make test
+make install-cli    # uv tool install --editable .  — the command tracks your source
 ```
 
-Check code formatting:
+If `forge` isn't found afterward, run `uv tool update-shell` and restart your shell. Uninstall with `make uninstall-cli`.
+
+## Configure
+
+`forge` reads its config from environment variables, including a local `.env` file (loaded via pydantic-settings):
 
 ```bash
-make format-check
+cp .env.example .env
+# then edit .env and set:
+#   GEMINI_API_KEY=your-key-here
+#   GEMINI_MODEL=gemini-2.5-flash   # optional; this is the default
 ```
 
-Run lint checks:
+`.env` is gitignored. Precedence is **shell env var → `.env` → built-in default**. (If no key is set, `forge` prints a one-line hint and exits instead of crashing.)
+
+## Use
 
 ```bash
-make lint-check
+uv run forge      # or just `forge` after `make install-cli`
 ```
 
-Run the complete CI quality gate:
+You get an interactive REPL. Type a message and the agent streams a reply; when it wants to use a tool it **asks for approval first** (every tool, every time, in M1).
+
+| Action | Key |
+|---|---|
+| Send a message | `Enter` |
+| **Steer** a running turn (redirect it now) | `Enter` while it's working |
+| **Follow-up** (queue work for when it's done) | `Alt+Enter` while it's working |
+| **Abort** the current turn | `Esc` |
+| Approve / deny a tool | type `y` / `n` at the prompt |
+| Quit | `Ctrl-D` or `/quit` |
+
+**Tools the agent can call** (all gated): `read` · `glob` · `grep` · `write` · `edit` · `bash` · `todo_write` (a task checklist) · `web_fetch` (HTML→Markdown) · `ask_user`.
+
+**Resume a previous session:**
 
 ```bash
-make ci
+uv run forge --resume            # the most recent session
+uv run forge --resume <session>  # a specific session id / filename
 ```
 
-## Project Structure
+**Memory.** `forge` loads `AGENTS.md` and `MEMORY.md` (walking from the working dir upward) into its context, and on exit appends a one-sentence summary of the session to `MEMORY.md` so the next session has a little context. Full transcripts are saved to `.forge/sessions/*.jsonl` (gitignored).
 
-```text
-forge/
-├── docs/               # Architecture documentation
-├── tasks/              # Task tracking
-├── tests/              # Unit and integration tests
-├── src/
-│   └── forge/          # Application package
-├── Makefile            # Development commands
-└── pyproject.toml      # Project configuration
+## Develop
+
+All verbs run at the repo root via the [`Makefile`](Makefile) (wrapping `uv`):
+
+```bash
+make test            # full test suite (unit + integration)
+make unit-tests      # unit only
+make lint-check      # ruff check        (lint-fix to auto-fix)
+make format-check    # ruff format check (format-fix to apply)
+make pre-commit      # format + lint + unit tests (the fast gate)
+make ci              # what CI runs: lockfile check + format + lint + full suite
+make help            # all targets
 ```
 
-The source tree will expand as additional components are implemented.
+Tests mirror `src/` 1:1 under `tests/`; model calls use Pydantic AI's `TestModel`/`FunctionModel`, so the suite needs **no network and no API key**. Conventions and the development workflow live in [`AGENTS.md`](AGENTS.md).
 
-## Development Principles
+## License
 
-Forge is being developed incrementally, with an emphasis on:
-
-* Explicit module responsibilities and clear control flow.
-* Minimal abstractions until concrete implementation requirements justify them.
-* Automated testing and consistent code quality checks.
-* Controlled dependency growth as new capabilities are introduced.
-* Reproducible development and execution workflows.
+[Apache-2.0](LICENSE).
