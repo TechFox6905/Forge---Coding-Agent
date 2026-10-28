@@ -48,6 +48,7 @@ from pydantic_ai.models.google import GoogleModel
 from pydantic_ai.providers.google import GoogleProvider
 
 from forge.config.settings import Settings, settings
+from forge.memory.files import harness_memory_path
 
 if TYPE_CHECKING:
     from pydantic_ai.messages import ModelMessage
@@ -55,8 +56,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-# The model-maintained memory file the write-back appends to (and that assemble_memory caps).
-_MEMORY_FILENAME = "MEMORY.md"
 
 # The one-shot summarizer's instruction. Cheap and blunt on purpose: one sentence, no preamble,
 # so the appended line stays a single readable bullet. Reused verbatim by M4 compaction.
@@ -107,17 +106,6 @@ async def summarize_session(
     return summary or None
 
 
-def _memory_path(cwd: Path) -> Path:
-    """The harness MEMORY.md path: ``cwd/.forge/MEMORY.md`` (Fix 1).
-
-    All harness-extracted memory lives under ``<cwd>/.forge`` alongside ``sessions/`` and
-    ``logs/`` so a project root stays clean. The location is config-driven via
-    ``settings.forge_dir`` (the single config reader), matching ``assemble_memory`` on the read
-    side. ``AGENTS.md`` is unchanged — it is human/project memory, still walked cwd→root.
-    """
-    return cwd / settings.forge_dir / _MEMORY_FILENAME
-
-
 def append_session_summary(cwd: Path, summary: str, *, now: datetime) -> None:
     """Append a dated summary line to ``cwd/.forge/MEMORY.md`` and trim to the caps (ADR-0002 §8).
 
@@ -135,7 +123,7 @@ def append_session_summary(cwd: Path, summary: str, *, now: datetime) -> None:
     if now.tzinfo is None:
         raise ValueError("now must be a timezone-aware (UTC) datetime, not naive")
 
-    memory = _memory_path(cwd)
+    memory = harness_memory_path(cwd)
     memory.parent.mkdir(parents=True, exist_ok=True)
     existing = memory.read_text(encoding="utf-8") if memory.is_file() else ""
 
@@ -171,7 +159,7 @@ async def extract_on_exit(messages: list[ModelMessage], cwd: Path) -> None:
         if summary is None:
             return
         append_session_summary(cwd, summary, now=_utc_now())
-        logger.debug("wrote session summary to %s", _memory_path(cwd))
+        logger.debug("wrote session summary to %s", harness_memory_path(cwd))
     except Exception:
         logger.warning("memory write-back on exit failed; continuing shutdown", exc_info=True)
 
