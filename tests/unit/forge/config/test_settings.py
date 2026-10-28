@@ -13,6 +13,7 @@ def test_defaults(monkeypatch):
     assert s.max_output_bytes == 50_000
     assert s.memory_max_lines == 200
     assert s.memory_max_bytes == 25_000
+    assert s.forge_dir == Path(".forge")
     assert s.sessions_dir == Path(".forge/sessions")
     assert s.gemini_api_key.get_secret_value() == ""
 

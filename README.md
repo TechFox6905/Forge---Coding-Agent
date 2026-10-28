@@ -19,13 +19,29 @@ cd example-repo
 make install        # uv sync + wire git hooks   (or just: uv sync)
 ```
 
-### Run `forge` from anywhere (optional)
+### Run `forge` as a CLI tool (recommended)
 
-`make install` lets you run the agent with `uv run forge`. To type just **`forge`** from any directory, put it on your PATH:
+`make install` lets you run the agent with `uv run forge`. To type just **`forge`** from **any project directory**, put it on your PATH:
 
 ```bash
 make install-cli    # uv tool install --editable .  — the command tracks your source
 ```
+
+Then `cd` into any project and run it directly:
+
+```bash
+cd ~/my-project
+forge              # start a fresh session in this directory
+forge --resume     # continue the most recent session here
+```
+
+`forge` always operates on the directory you launch it from (its working dir), and writes everything it produces under **`<cwd>/.forge/`** in that project:
+
+- `.forge/sessions/*.jsonl` — replayable session transcripts (used by `forge --resume`).
+- `.forge/MEMORY.md` — the one-sentence-per-session memory the agent appends on exit and reloads next time.
+- `.forge/logs/forge.log` — the log file (logs go here, **not** to the terminal, so the REPL stays clean).
+
+The whole `.forge/` directory is gitignored.
 
 If `forge` isn't found afterward, run `uv tool update-shell` and restart your shell. Uninstall with `make uninstall-cli`.
 
@@ -45,10 +61,10 @@ cp .env.example .env
 ## Use
 
 ```bash
-uv run forge      # or just `forge` after `make install-cli`
+forge             # after `make install-cli` (or `uv run forge`)
 ```
 
-You get an interactive REPL. Type a message and the agent streams a reply; when it wants to use a tool it **asks for approval first** (every tool, every time, in M1).
+You get an interactive REPL. Type a message and the agent streams a reply; when it wants to use a tool it **asks for approval first** (every tool, every time, in M1). Your messages echo as `you "…"` and the agent's streamed answer is labelled `Forge …`, so the conversation reads clearly.
 
 | Action | Key |
 |---|---|
@@ -64,11 +80,11 @@ You get an interactive REPL. Type a message and the agent streams a reply; when 
 **Resume a previous session:**
 
 ```bash
-uv run forge --resume            # the most recent session
-uv run forge --resume <session>  # a specific session id / filename
+forge --resume            # the most recent session
+forge --resume <session>  # a specific session id / filename
 ```
 
-**Memory.** `forge` loads `AGENTS.md` and `MEMORY.md` (walking from the working dir upward) into its context, and on exit appends a one-sentence summary of the session to `MEMORY.md` so the next session has a little context. Full transcripts are saved to `.forge/sessions/*.jsonl` (gitignored).
+**Memory.** `forge` loads `AGENTS.md` (walking from the working dir upward) and the harness `.forge/MEMORY.md` into its context, and on exit appends a one-sentence summary of the session to `.forge/MEMORY.md` so the next session has a little context. Full transcripts are saved to `.forge/sessions/*.jsonl` and logs to `.forge/logs/forge.log` (all gitignored under `<cwd>/.forge/`).
 
 ## Develop
 

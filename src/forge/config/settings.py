@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from pydantic import SecretStr
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -23,6 +23,14 @@ class Settings(BaseSettings):
 
     # --- Logging ---
     log_level: str = "INFO"
+    # Log file path (Fix 3). Logs go to a file, off the terminal; default <cwd>/.forge/logs/
+    # forge.log. Empty string disables file logging. Read from env ``FORGE_LOG_FILE``. NB:
+    # ``logging.init_logger`` reads ``FORGE_LOG_FILE`` from the environment directly (it must
+    # configure logging before importing this settings module), so this field exists for
+    # documentation / a single declared surface, not as its reader.
+    log_file: str = Field(
+        default=str(Path(".forge") / "logs" / "forge.log"), alias="FORGE_LOG_FILE"
+    )
 
     # --- Tool execution / output truncation (tasks 006/008/010) ---
     bash_timeout_s: float = 120.0
@@ -33,6 +41,9 @@ class Settings(BaseSettings):
     # --- Memory caps (task 012/013) ---
     memory_max_lines: int = 200
     memory_max_bytes: int = 25_000
+
+    # --- Harness artifacts: everything forge writes lives under <cwd>/.forge (Fix 1). ---
+    forge_dir: Path = Path(".forge")
 
     # --- Persistence: JSONL session log (task 014) ---
     sessions_dir: Path = Path(".forge/sessions")

@@ -25,21 +25,36 @@ def mock_run_app(mocker):
     )
 
 
-def test_cli_runs_and_exits_zero(mock_run_app):
+def test_cli_runs_and_exits_zero(mock_run_app, mocker):
+    mocker.patch.object(
+        cli_mod.settings,
+        "gemini_api_key",
+        SecretStr("test-api-key"),
+    )
     result = CliRunner().invoke(cli, [])
 
     assert result.exit_code == 0
     mock_run_app.assert_awaited_once_with(resume=None)
 
 
-def test_cli_accepts_resume_flag(mock_run_app):
+def test_cli_accepts_resume_flag(mock_run_app, mocker):
+    mocker.patch.object(
+        cli_mod.settings,
+        "gemini_api_key",
+        SecretStr("test-api-key"),
+    )
     result = CliRunner().invoke(cli, ["--resume"])
 
     assert result.exit_code == 0
     mock_run_app.assert_awaited_once_with(resume="latest")
 
 
-def test_cli_accepts_named_resume(mock_run_app):
+def test_cli_accepts_named_resume(mock_run_app, mocker):
+    mocker.patch.object(
+        cli_mod.settings,
+        "gemini_api_key",
+        SecretStr("test-api-key"),
+    )
     result = CliRunner().invoke(cli, ["--resume", "2026-06-19_abc"])
 
     assert result.exit_code == 0
@@ -47,6 +62,11 @@ def test_cli_accepts_named_resume(mock_run_app):
 
 
 def test_cli_passes_no_resume_by_default(mocker):
+    mocker.patch.object(
+        cli_mod.settings,
+        "gemini_api_key",
+        SecretStr("test-api-key"),
+    )
     # Without --resume the CLI starts a fresh session (run_app gets resume=None).
     run_app = mocker.patch("forge.cli.run_app", new=AsyncMock())
 
@@ -57,6 +77,11 @@ def test_cli_passes_no_resume_by_default(mocker):
 
 
 def test_cli_passes_latest_resume_for_the_bare_flag(mocker):
+    mocker.patch.object(
+        cli_mod.settings,
+        "gemini_api_key",
+        SecretStr("test-api-key"),
+    )
     # `--resume` with no value resumes the latest session (run_app gets resume="latest").
     run_app = mocker.patch("forge.cli.run_app", new=AsyncMock())
 
@@ -67,6 +92,11 @@ def test_cli_passes_latest_resume_for_the_bare_flag(mocker):
 
 
 def test_cli_passes_named_resume_through(mocker):
+    mocker.patch.object(
+        cli_mod.settings,
+        "gemini_api_key",
+        SecretStr("test-api-key"),
+    )
     # `--resume <id>` resumes that named session (run_app gets resume=<id>).
     run_app = mocker.patch("forge.cli.run_app", new=AsyncMock())
 
