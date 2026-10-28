@@ -1,7 +1,7 @@
 ---
 id: 014-session-log-persistence
 feature: m1-vanilla-agent
-status: pending
+status: done
 ---
 
 # Session-log persistence (JSONL + resume)
@@ -10,11 +10,10 @@ status: pending
 Append-only JSONL session log with replay ([ADR-0002 §9](../docs/adr/0002-milestone-1-vanilla-agent-architecture.md)), wired into the harness + a `forge --resume` flag.
 
 ## Acceptance criteria
-- [ ] `context/session_log.py` writes a **header line 0** (`version, session_id, cwd, created_at` UTC) then appends each turn's `new_messages()` as **typed** JSONL to `.forge/sessions/<ts>_<uuid>.jsonl`.
-- [ ] `forge --resume` rebuilds `message_history` from the latest session file.
-- [ ] A truncated trailing line is tolerated on replay (skip, don't crash).
-- [ ] `.forge/sessions/` is gitignored.
+- [x] `context/session_log.py` writes a **header line 0** (`version, session_id, cwd, created_at` UTC) then appends each turn's `new_messages()` as **typed** JSONL to `.forge/sessions/<ts>_<uuid>.jsonl`.
+- [x] `forge --resume` rebuilds `message_history` from the latest session file.
+- [x] A truncated trailing line is tolerated on replay (skip, don't crash).
+- [x] `.forge/sessions/` is gitignored.
 
 ## Out of scope
 - SQLite/Kitaru durability; session branching/forking; compaction entries (later milestones).
-
