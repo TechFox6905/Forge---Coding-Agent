@@ -35,10 +35,10 @@ from pydantic_ai import Agent, DeferredToolRequests
 from pydantic_ai.messages import ModelMessage, ModelRequest, ToolReturnPart, UserPromptPart
 from pydantic_ai.models.function import AgentInfo, DeltaToolCall, FunctionModel
 from rich.console import Console
+from support.noop_helper import register_noop
 
 from forge.agent.deps import AgentDeps
 from forge.tools.askuser import ask_user
-from forge.tools.noop import register_noop
 from forge.tui import app as app_mod
 
 # Marker the simple chat agent streams as its only reply (used by the memory write-back wiring).

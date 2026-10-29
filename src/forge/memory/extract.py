@@ -49,6 +49,7 @@ from pydantic_ai.providers.google import GoogleProvider
 
 from forge.config.settings import Settings, settings
 from forge.memory.files import harness_memory_path
+from forge.memory.service import clip_lines_to_budget
 
 if TYPE_CHECKING:
     from pydantic_ai.messages import ModelMessage
@@ -130,8 +131,11 @@ def append_session_summary(cwd: Path, summary: str, *, now: datetime) -> None:
     dated_line = f"- {now.astimezone(UTC):%Y-%m-%d}: {summary}"
     lines = [*existing.splitlines(), dated_line]
 
-    trimmed = _trim_keeping_recent(
-        lines, max_lines=settings.memory_max_lines, max_bytes=settings.memory_max_bytes
+    trimmed = clip_lines_to_budget(
+        lines,
+        max_lines=settings.memory_max_lines,
+        max_bytes=settings.memory_max_bytes,
+        keep="tail",
     )
     memory.write_text(trimmed + "\n", encoding="utf-8")
 
@@ -197,18 +201,3 @@ def _render_transcript(messages: list[ModelMessage]) -> str:
                 if isinstance(part, TextPart) and part.content.strip():
                     lines.append(f"Assistant: {part.content.strip()}")
     return "\n".join(lines)
-
-
-def _trim_keeping_recent(lines: list[str], *, max_lines: int, max_bytes: int) -> str:
-    """Return the **tail** of ``lines`` capped by line count then by byte count (line-aligned).
-
-    The write-back keeps the *most-recent* memory, so trimming drops from the **front**: keep at
-    most ``max_lines`` trailing whole lines, then drop further leading whole lines until the UTF-8
-    byte length is within ``max_bytes``. If even the last line alone exceeds ``max_bytes`` we keep
-    that one whole line — the freshest note is never split away to nothing. Mirrors the
-    head-keeping clip in :func:`forge.memory.service._clip_to_budget`, but tail-keeping.
-    """
-    tail = lines[-max_lines:] if max_lines > 0 else lines[-1:]
-    while len(tail) > 1 and len("\n".join(tail).encode("utf-8")) > max_bytes:
-        tail = tail[1:]
-    return "\n".join(tail)
