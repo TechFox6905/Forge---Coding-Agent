@@ -1,6 +1,6 @@
 """Unit tests for the read-only file tools (``forge.tools.files``).
 
-ADR-0002 §7: ``read`` (line-paginated, 1-indexed, numbered, truncated), ``glob`` (paths only),
+ADR-001 §7: ``read`` (line-paginated, 1-indexed, numbered, truncated), ``glob`` (paths only),
 and ``grep`` (regex search) are the read-only file tools. All three:
 
 * **gate** — raise :class:`pydantic_ai.ApprovalRequired` until the call is approved (v1 asks on

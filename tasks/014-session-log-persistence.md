@@ -7,7 +7,7 @@ status: done
 # Session-log persistence (JSONL + resume)
 
 ## Scope
-Append-only JSONL session log with replay ([ADR-0002 §9](../docs/adr/0002-milestone-1-vanilla-agent-architecture.md)), wired into the harness + a `forge --resume` flag.
+Append-only JSONL session log with replay ([ADR-001 §9](../docs/adr/001-milestone-1-core-agent-architecture.md)), wired into the harness + a `forge --resume` flag.
 
 ## Acceptance criteria
 - [x] `context/session_log.py` writes a **header line 0** (`version, session_id, cwd, created_at` UTC) then appends each turn's `new_messages()` as **typed** JSONL to `.forge/sessions/<ts>_<uuid>.jsonl`.

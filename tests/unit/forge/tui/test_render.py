@@ -58,7 +58,7 @@ def test_render_tool_result_is_a_panel_with_output():
         events.ToolResult(tool_call_id="t1", name="bash", output="file.txt")
     )
 
-    # ADR-0002 §6: completed tool calls render as a panel.
+    # ADR-001 §6: completed tool calls render as a panel.
     assert isinstance(renderable, Panel)
     text = _render_to_text(renderable)
     assert "bash" in text
@@ -107,7 +107,7 @@ def test_render_task_list_updated_lists_the_tasks():
 
 def test_render_task_list_updated_shows_a_mixed_status_checklist():
     # The tasks tool emits already-status-marked lines ([x]/[~]/[ ]); the renderer shows them
-    # as a checklist so a mixed-status list reads sensibly (ADR-0002 §7).
+    # as a checklist so a mixed-status list reads sensibly (ADR-001 §7).
     text = _render_to_text(
         render.render_event(events.TaskListUpdated(tasks=("[x] design", "[~] build", "[ ] test")))
     )

@@ -1,4 +1,4 @@
-"""Unit tests for the :class:`forge.entities.task.Task` model (ADR-0002 §7).
+"""Unit tests for the :class:`forge.entities.task.Task` model (ADR-001 §7).
 
 ``Task`` is the in-memory TodoWrite item the model maintains within a session. Like the
 other entities it is frozen + slotted so it is cheap and safe to pass across the

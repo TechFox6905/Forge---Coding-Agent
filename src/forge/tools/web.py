@@ -1,4 +1,4 @@
-"""The gated ``web_fetch`` tool — GET a URL and hand the model readable text (ADR-0002 §7,10).
+"""The gated ``web_fetch`` tool — GET a URL and hand the model readable text (ADR-001 §7,10).
 
 ``web_fetch`` does a single HTTP **GET** with an :class:`httpx.AsyncClient` and returns the page
 as model-readable text. When the response is **HTML it is converted to Markdown** (with
@@ -22,7 +22,7 @@ it — we cap by **raw UTF-8 bytes** instead (truncated to a valid character bou
 notice. Capping the *source* text (not just the Markdown) means the conversion itself never has
 to chew through an unbounded document.
 
-**Gating (ADR-0002 §3).** v1 asks on *every* tool call, so the function raises
+**Gating (ADR-001 §3).** v1 asks on *every* tool call, so the function raises
 :class:`pydantic_ai.ApprovalRequired` until ``ctx.tool_call_approved`` is set — *before* any
 connection is opened, so a denied call makes no network request at all. It is tagged
 ``read_only=True`` (see :data:`WEB_FETCH_READ_ONLY`): a GET has **no local side effect** (network
@@ -86,7 +86,7 @@ _TRANSPORT: httpx.BaseTransport | httpx.AsyncBaseTransport | None = None
 
 
 async def web_fetch(ctx: RunContext[AgentDeps], url: str) -> str:
-    """GET ``url`` and return its content as model-readable text (ADR-0002 §7).
+    """GET ``url`` and return its content as model-readable text (ADR-001 §7).
 
     The page is fetched with an :class:`httpx.AsyncClient` under
     ``settings.web_fetch_timeout_s``, following redirects. An HTML response is converted to
@@ -94,7 +94,7 @@ async def web_fetch(ctx: RunContext[AgentDeps], url: str) -> str:
     content is returned as-is. An oversized body is hard-capped to :data:`_MAX_RESPONSE_BYTES`
     (with a clipped notice). The reply states the HTTP status and the final URL.
 
-    Gated (ADR-0002 §3): raises :class:`pydantic_ai.ApprovalRequired` until the call is approved —
+    Gated (ADR-001 §3): raises :class:`pydantic_ai.ApprovalRequired` until the call is approved —
     and *before* any connection is opened — so a denied call makes no request. Returns a
     model-readable :class:`pydantic_ai.ModelRetry` for an empty URL, a non-2xx status, a timeout,
     a connection error, or non-text content, so the model can recover instead of crashing the REPL.

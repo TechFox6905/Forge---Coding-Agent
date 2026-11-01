@@ -108,7 +108,7 @@ def test_parse_permission_answer_allows_on_affirmative(answer):
 
 @pytest.mark.parametrize("answer", ["n", "no", "deny", "d", "", "anything else", "maybe"])
 def test_parse_permission_answer_denies_on_anything_else(answer):
-    # ADR-0002 §3 + the safe default: anything that is not a clear "yes" denies.
+    # ADR-001 §3 + the safe default: anything that is not a clear "yes" denies.
     decision = app.parse_permission_answer(answer)
 
     assert decision.outcome is PermissionOutcome.DENY

@@ -1,6 +1,6 @@
 """Unit tests for the blocking ``ask_user`` tool (``forge.tools.askuser``).
 
-ADR-0002 §2,7: ``ask_user`` is the *one* blocking tool — the model asks the human a free-form
+ADR-001 §2,7: ``ask_user`` is the *one* blocking tool — the model asks the human a free-form
 question and the human's typed line becomes the tool result. Unlike every other tool it is
 **not** routed through the permission gate (asking "may I ask the human?" before asking would
 double-prompt — it *is* the human-interaction tool), so it never raises ``ApprovalRequired``;

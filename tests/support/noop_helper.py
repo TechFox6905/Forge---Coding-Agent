@@ -1,4 +1,4 @@
-"""The trivial gated ``noop`` tool — a **TEST-ONLY** helper (ADR-0002 §3,7).
+"""The trivial gated ``noop`` tool — a **TEST-ONLY** helper (ADR-001 §3,7).
 
 ``noop`` was the single tool task 005 shipped to make the permission-gate-via-deferred-tools
 path real end to end *before any real tool existed* (the real file/bash/web tools are 006-011,
@@ -33,7 +33,7 @@ NOOP_READ_ONLY = False
 
 
 def noop(ctx: RunContext[AgentDeps], text: str) -> str:
-    """Echo ``text`` — but only after the call has been approved (ADR-0002 §3).
+    """Echo ``text`` — but only after the call has been approved (ADR-001 §3).
 
     Raises :class:`pydantic_ai.ApprovalRequired` until the run context is approved, so the
     first leg defers to the gate; on the approved resume leg it returns ``"noop: <text>"``.

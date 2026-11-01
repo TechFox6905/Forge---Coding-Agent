@@ -1,6 +1,6 @@
 """Unit tests for the permission domain models (``forge.entities.permissions``).
 
-ADR-0002 §3: a :class:`~forge.entities.permissions.PermissionRequest` describes the gated
+ADR-001 §3: a :class:`~forge.entities.permissions.PermissionRequest` describes the gated
 tool call the gate is asked about; a :class:`~forge.entities.permissions.PermissionDecision`
 is the gate's verdict (``allow`` / ``ask`` / ``deny``) plus the mode it was evaluated under.
 These are frozen value objects passed across the loop / gate / TUI boundary, so the tests
@@ -48,7 +48,7 @@ def test_permission_decision_allow_and_deny_constructors():
 
 
 def test_permission_decision_ask_carries_mode():
-    # The gate's verdict in v1 is always ASK under the ASK mode (ADR-0002 §3).
+    # The gate's verdict in v1 is always ASK under the ASK mode (ADR-001 §3).
     decision = PermissionDecision.ask(mode=PermissionMode.ASK)
 
     assert decision.outcome is PermissionOutcome.ASK
@@ -60,7 +60,7 @@ def test_permission_decision_default_mode_is_ask():
 
 
 def test_permission_outcome_has_allow_ask_deny():
-    # ADR-0002 §3: the gate returns allow / ask / deny.
+    # ADR-001 §3: the gate returns allow / ask / deny.
     assert {o.value for o in PermissionOutcome} == {"allow", "ask", "deny"}
 
 

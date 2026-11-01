@@ -7,7 +7,7 @@ status: done
 # TUI shell (echo)
 
 ## Scope
-The terminal UI layer per [ADR-0002 §6](../docs/adr/0002-milestone-1-vanilla-agent-architecture.md): `patch_stdout()` + concurrent `prompt_async()` input with append-style Rich output. No agent yet — echoes input.
+The terminal UI layer per [ADR-001 §6](../docs/adr/001-milestone-1-core-agent-architecture.md): `patch_stdout()` + concurrent `prompt_async()` input with append-style Rich output. No agent yet — echoes input.
 
 ## Acceptance criteria
 - [x] `tui/app.py` runs a persistent input line via `prompt_async()` inside `patch_stdout()`; `Alt+Enter` and `Esc` keybindings registered; footer hint shows steer/follow-up/abort.

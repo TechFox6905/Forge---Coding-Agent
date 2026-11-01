@@ -305,14 +305,14 @@ async def test_milestone1_capstone_full_stack(tmp_path, monkeypatch):
     assert _TODO_CONTENT in rendered, "the task checklist must render in the TUI transcript"
     assert _FINAL_TEXT in rendered, "the streamed assistant text must render"
 
-    # --- assert: the session log was written and replays (ADR-0002 §9) ----------------------
+    # --- assert: the session log was written and replays (ADR-001 §9) ----------------------
     replayed = session_log.load(log.path)
     assert replayed == handler.message_history, "the JSONL log must replay the whole conversation"
     # The log is append-only: a header line + one batch per turn (six turns).
     lines = [ln for ln in log.path.read_text(encoding="utf-8").splitlines() if ln]
     assert len(lines) == 1 + 6, "header + one append per turn"
 
-    # --- assert: ``--resume`` replays the history into a fresh handler (ADR-0002 §9) --------
+    # --- assert: ``--resume`` replays the history into a fresh handler (ADR-001 §9) --------
     resumed = session_log.load_latest(sessions_dir)
     assert resumed == handler.message_history
     fresh_handler = AgentTurnHandler(agent, deps=deps, message_history=resumed)
@@ -328,7 +328,7 @@ async def test_milestone1_capstone_full_stack(tmp_path, monkeypatch):
     ]
     assert any("read the notes file" in p for p in user_prompts)
 
-    # --- assert: the on-exit memory write-back wrote a dated summary line (ADR-0002 §8) -----
+    # --- assert: the on-exit memory write-back wrote a dated summary line (ADR-001 §8) -----
     # The summarizer is a TestModel (no network); extract_on_exit reads ``settings.gemini_api_key``
     # to decide whether to run, so the faked key (autouse fixture) lets it proceed. We route the
     # real summarize_session through the fake model so the file-write path is exercised for real.

@@ -1,4 +1,4 @@
-"""Shared output-truncation helper for tool results (ADR-0002 §7,10).
+"""Shared output-truncation helper for tool results (ADR-001 §7,10).
 
 Tool output that goes to the model is capped at **2000 lines OR 50 KB, whichever comes
 first** (the caps come from ``settings.max_output_lines`` / ``settings.max_output_bytes``),
@@ -29,7 +29,7 @@ _SPILL_SUFFIX = ".txt"
 
 @dataclass(frozen=True, slots=True)
 class Truncated:
-    """The result of truncating tool output (ADR-0002 §7).
+    """The result of truncating tool output (ADR-001 §7).
 
     ``text`` is the (possibly shortened) content safe to hand the model. ``truncated`` says
     whether anything was dropped. ``full_path`` is the temp file holding the *complete*

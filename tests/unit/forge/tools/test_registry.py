@@ -1,6 +1,6 @@
 """Unit tests for the flat tool registry (``forge.tools.registry``).
 
-ADR-0002 §7: tools live in a **flat registry** — no plugin machinery. The registry is the one
+ADR-001 §7: tools live in a **flat registry** — no plugin machinery. The registry is the one
 place that (a) registers every tool on the :class:`~pydantic_ai.Agent` and (b) records each
 tool's ``read_only`` flag, which the loop reads via :func:`forge.tools.is_read_only` when it
 builds a :class:`~forge.entities.permissions.PermissionRequest`.
@@ -40,7 +40,7 @@ def test_registry_lists_the_expected_tools():
 
 
 def test_registry_does_not_expose_the_scaffolding_noop_tool():
-    # ADR-0002 §7 + AGENTS.md: the task-005 ``noop`` scaffolding is superseded by the real
+    # ADR-001 §7 + AGENTS.md: the task-005 ``noop`` scaffolding is superseded by the real
     # tools (006-011) and must NOT ride on the production agent. It survives only as a
     # TEST-ONLY helper (support.noop_helper.register_noop), never in the registry.
     assert "noop" not in {spec.name for spec in TOOL_SPECS}

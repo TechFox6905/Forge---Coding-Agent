@@ -1,6 +1,6 @@
 """Unit tests for the shared output-truncation helper (``forge.tools.truncate``).
 
-ADR-0002 §7,10: tool output is capped at **2000 lines OR 50 KB, whichever comes first**,
+ADR-001 §7,10: tool output is capped at **2000 lines OR 50 KB, whichever comes first**,
 snapping to a line boundary; on overflow the *full* content spills to a temp file whose path
 rides back in the result so the model (and the user) can still reach everything. The helper is
 deliberately tool-agnostic: ``read`` (task 006) and ``bash`` (task 008) both reuse it.

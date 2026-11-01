@@ -1,4 +1,4 @@
-"""Discover the project memory files to inject into the prompt (ADR-0002 §8, Fix 1).
+"""Discover the project memory files to inject into the prompt (ADR-001 §8, Fix 1).
 
 :func:`discover_memory_files` returns the memory files that exist, in the order a downstream
 concatenation should read them. Two file kinds are memory, discovered **differently**:
@@ -7,7 +7,7 @@ concatenation should read them. Two file kinds are memory, discovered **differen
   collecting every ancestor's ``AGENTS.md`` (a developer running ``forge`` from a subdirectory
   still picks up the project-root rules).
 * ``MEMORY.md`` — the **harness-extracted** scratch memory. NOT walked: it is the single file
-  ``cwd/.forge/MEMORY.md`` (the on-exit write-back's output, ADR-0002 §8 + Fix 1), consolidated
+  ``cwd/.forge/MEMORY.md`` (the on-exit write-back's output, ADR-001 §8 + Fix 1), consolidated
   with the rest of the harness artifacts (``sessions/``, ``logs/``) under ``<cwd>/.forge``.
 
 ``CLAUDE.md`` is **skipped**: it is the Claude-Code shim (it just imports ``AGENTS.md``), so
@@ -25,7 +25,7 @@ so the **cwd-most** (most specific) file appears **last** in the prompt and ther
 final word — the same "nearest config wins" rule editors and linters use.
 
 **Pure and sync.** Filesystem stats are local and fast and the tool layer runs sequentially in
-v1 (ADR-0002 §7,10), so there is no concurrency to win by going async. The function only reads
+v1 (ADR-001 §7,10), so there is no concurrency to win by going async. The function only reads
 directory metadata (``Path.is_file``); it never opens a file (that is the service's job).
 """
 

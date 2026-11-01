@@ -7,7 +7,7 @@ status: done
 # Memory: files layer + injection
 
 ## Scope
-Read the project memory files and inject them into the agent's instructions ([ADR-0002 §8](../docs/adr/0002-milestone-1-vanilla-agent-architecture.md)).
+Read the project memory files and inject them into the agent's instructions ([ADR-001 §8](../docs/adr/001-milestone-1-core-agent-architecture.md)).
 
 ## Acceptance criteria
 - [x] `memory/files.py` discovers `AGENTS.md` + `MEMORY.md` walking cwd→repo-root (cwd-most wins); `CLAUDE.md` skipped.

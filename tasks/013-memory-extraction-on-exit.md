@@ -7,7 +7,7 @@ status: done
 # Memory: extraction on exit
 
 ## Scope
-A deliberately minimal memory-write loop ([ADR-0002 §8](../docs/adr/0002-milestone-1-vanilla-agent-architecture.md)): summarize the session into one sentence on quit, to be deepened in M4.
+A deliberately minimal memory-write loop ([ADR-001 §8](../docs/adr/001-milestone-1-core-agent-architecture.md)): summarize the session into one sentence on quit, to be deepened in future.
 
 ## Acceptance criteria
 - [x] `memory/extract.py` runs on session end: one cheap Gemini call summarizes the conversation into a single sentence.
@@ -16,4 +16,4 @@ A deliberately minimal memory-write loop ([ADR-0002 §8](../docs/adr/0002-milest
 - [x] The line is picked up by `memory.service` on the next session.
 
 ## Out of scope
-- Forked-agent extractor, topic files, recall selector, compaction (M4).
+- Forked-agent extractor, topic files, recall selector, compaction.

@@ -1,4 +1,4 @@
-"""Unit tests for :func:`forge.memory.service.assemble_memory` (ADR-0002 §8).
+"""Unit tests for :func:`forge.memory.service.assemble_memory` (ADR-001 §8).
 
 ``assemble_memory`` reads the files :func:`~forge.memory.files.discover_memory_files` found,
 concatenates them with a **provenance header** (``# From <abs path>``) per file, and caps

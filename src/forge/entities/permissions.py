@@ -1,4 +1,4 @@
-"""Shared value objects for the permission gate (ADR-0002 §3).
+"""Shared value objects for the permission gate (ADR-001 §3).
 
 Two frozen models cross the loop / gate / TUI boundary:
 
@@ -27,7 +27,7 @@ from forge.permissions.types import PermissionMode
 
 
 class PermissionOutcome(enum.Enum):
-    """The three verdicts the gate can return (ADR-0002 §3).
+    """The three verdicts the gate can return (ADR-001 §3).
 
     ``ASK`` means "route to the human" — the v1 gate always returns this. ``ALLOW`` / ``DENY``
     are the terminal verdicts the resolver produces from the human's answer (and the seam
@@ -58,7 +58,7 @@ class PermissionRequest:
 
 @dataclass(frozen=True, slots=True)
 class PermissionDecision:
-    """The gate's verdict on a :class:`PermissionRequest` (ADR-0002 §3).
+    """The gate's verdict on a :class:`PermissionRequest` (ADR-001 §3).
 
     ``outcome`` is the verdict; ``mode`` is the :class:`~forge.permissions.types.PermissionMode`
     it was evaluated under (always ``ASK`` in v1); ``reason`` is an optional human-facing

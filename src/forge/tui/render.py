@@ -1,6 +1,6 @@
 """Pure mappings from the canonical event union to Rich renderables (append-style).
 
-ADR-0002 §6: output is **append-style** above a persistent input line -- no self-rewriting
+ADR-001 §6: output is **append-style** above a persistent input line -- no self-rewriting
 live region -- and **tool calls render on completion** (as a panel) to avoid flicker.
 
 The events come from :mod:`forge.entities.events` (the single contract the harness emits).
@@ -22,7 +22,7 @@ from forge.entities import events
 # A subtle gray background applied to the conversation lines — the user (`you "…"`) line and the
 # assistant (`Forge …`) stream — so the conversation text reads as visually distinct from the
 # tool panels / errors (Fix 2). Kept deliberately soft (``grey15``); a true full-terminal
-# background is not possible in append-style mode (ADR-0002 §6), so we style the renderables and
+# background is not possible in append-style mode (ADR-001 §6), so we style the renderables and
 # pad them to the console width (:meth:`Text.pad_right` at print time would over-pad streamed
 # deltas, so the background simply rides the text plus its leading label).
 CONVERSATION_BG = Style(bgcolor="grey15")
@@ -78,7 +78,7 @@ def _render_tool_call_started(event: events.ToolCallStarted) -> Text:
 
 
 def _render_tool_result(event: events.ToolResult) -> Panel:
-    """A bordered panel summarizing a completed tool call (ADR-0002 §6: on completion)."""
+    """A bordered panel summarizing a completed tool call (ADR-001 §6: on completion)."""
     border = "green" if event.ok else "red"
     body = Text(event.output, style="default" if event.ok else "red")
     title = event.name if event.ok else f"{event.name} (failed)"
@@ -86,7 +86,7 @@ def _render_tool_result(event: events.ToolResult) -> Panel:
 
 
 def _render_permission_requested(event: events.PermissionRequested) -> Text:
-    """A prompt asking the user to approve a tool call (ADR-0002 §3)."""
+    """A prompt asking the user to approve a tool call (ADR-001 §3)."""
     return Text.assemble(
         ("permission? ", "bold yellow"),
         (event.name, "yellow"),
@@ -95,7 +95,7 @@ def _render_permission_requested(event: events.PermissionRequested) -> Text:
 
 
 def _render_ask_user_requested(event: events.AskUserRequested) -> Text:
-    """The agent's free-form question to the user (ADR-0002 §7)."""
+    """The agent's free-form question to the user (ADR-001 §7)."""
     return Text.assemble(("ask: ", "bold magenta"), (event.question, "magenta"))
 
 
@@ -115,7 +115,7 @@ def _render_turn_started(event: events.TurnStarted) -> Text:
 
     The prompt is double-quoted so the user's text reads as a quoted utterance, and the whole
     line carries the conversation background that distinguishes user/assistant lines from the
-    tool panels / errors (ADR-0002 §6 — append-style, so we style the renderable).
+    tool panels / errors (ADR-001 §6 — append-style, so we style the renderable).
     """
     return Text.assemble(
         ("you ", "dim cyan"),

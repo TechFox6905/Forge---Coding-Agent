@@ -1,6 +1,6 @@
 """Unit tests for the harness runner: phase machine, single-flight, drain, abort.
 
-These exercise the load-bearing semantics from ADR-0002 §4-5 against a *controllable*
+These exercise the load-bearing semantics from ADR-001 §4-5 against a *controllable*
 stub turn handler (no real agent). The handler is an async generator that yields
 :class:`Boundary` markers; the runner drives it, draining the queues and checking the
 abort flag at those boundaries. The stub records what steering/follow-up the runner fed
@@ -86,7 +86,7 @@ async def test_submit_on_idle_runs_a_turn_to_completion():
 
 
 async def test_phase_is_set_before_submit_yields_and_before_the_turn_runs():
-    """ADR-0002 §4: the single-flight phase is set synchronously, before any await.
+    """ADR-001 §4: the single-flight phase is set synchronously, before any await.
 
     The idle path of ``submit`` has no ``await`` before it flips the phase and schedules the
     turn task, so by the time ``await submit(...)`` returns the runner is already busy --
@@ -116,7 +116,7 @@ async def test_phase_is_set_before_submit_yields_and_before_the_turn_runs():
 
 
 async def test_steering_drains_before_each_model_request_leg():
-    """ADR-0002 §4: steering is drained before each model-request leg."""
+    """ADR-001 §4: steering is drained before each model-request leg."""
     handler = RecordingHandler(steps=2)
     handler.leg_gate = asyncio.Event()
     runner = Runner(handler, on_event=_collect([]))
@@ -135,7 +135,7 @@ async def test_steering_drains_before_each_model_request_leg():
 
 
 async def test_followup_drains_only_at_would_stop_boundary():
-    """ADR-0002 §4: follow-up is drained only at the would-stop boundary."""
+    """ADR-001 §4: follow-up is drained only at the would-stop boundary."""
     handler = RecordingHandler(steps=1)
     runner = Runner(handler, on_event=_collect([]))
 
@@ -174,7 +174,7 @@ async def test_followup_is_not_drained_at_a_model_request_boundary():
 
 
 async def test_second_concurrent_submit_does_not_start_a_parallel_turn():
-    """ADR-0002 §4: the single-flight lock spans the whole turn."""
+    """ADR-001 §4: the single-flight lock spans the whole turn."""
     handler = RecordingHandler(steps=1)
     handler.leg_gate = asyncio.Event()
     runner = Runner(handler, on_event=_collect([]))
@@ -192,7 +192,7 @@ async def test_second_concurrent_submit_does_not_start_a_parallel_turn():
 
 
 async def test_abort_stops_at_next_boundary_keeping_completed_history():
-    """ADR-0002 §5: Esc stops the turn at the next boundary, keeps completed history."""
+    """ADR-001 §5: Esc stops the turn at the next boundary, keeps completed history."""
     emitted: list[events.Event] = []
     handler = RecordingHandler(steps=3)
     handler.leg_gate = asyncio.Event()
@@ -213,7 +213,7 @@ async def test_abort_stops_at_next_boundary_keeping_completed_history():
 
 
 async def test_abort_clears_the_queues_and_returns_to_idle():
-    """ADR-0002 §5: on abort the queues are cleared and the runner returns to idle."""
+    """ADR-001 §5: on abort the queues are cleared and the runner returns to idle."""
     handler = RecordingHandler(steps=2)
     handler.leg_gate = asyncio.Event()
     runner = Runner(handler, on_event=_collect([]))

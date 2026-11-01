@@ -1,4 +1,4 @@
-"""Narrow types for the permission gate (ADR-0002 §3).
+"""Narrow types for the permission gate (ADR-001 §3).
 
 :class:`PermissionMode` is the **seam** M3 grows into ``default/plan/edit/bypass``. v1 ships
 only ``ASK`` (ask on every tool call), so the gate has exactly one mode to evaluate under;
@@ -15,7 +15,7 @@ import enum
 
 
 class PermissionMode(enum.Enum):
-    """How the gate decides on a tool call (ADR-0002 §3).
+    """How the gate decides on a tool call (ADR-001 §3).
 
     v1 is ``ASK`` only: every tool call is routed to the human. M3 adds ``default`` (read-only
     auto-allow), ``plan`` (read-only, no mutations), ``edit`` (file edits auto-allowed), and

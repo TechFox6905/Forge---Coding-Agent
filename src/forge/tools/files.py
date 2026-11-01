@@ -1,4 +1,4 @@
-"""The file tools: ``read`` / ``glob`` / ``grep`` (read-only) and ``write`` / ``edit`` (ADR-0002 §7).
+"""The file tools: ``read`` / ``glob`` / ``grep`` (read-only) and ``write`` / ``edit`` (ADR-001 §7).
 
 How the agent touches the working tree:
 
@@ -10,7 +10,7 @@ How the agent touches the working tree:
 * :func:`edit` — replace a **unique** occurrence of ``old_string`` (BOM-stripped, EOL-normalized
   for matching; exact-then-whitespace-fuzzy), restoring the file's original BOM / line endings.
 
-**Gating (ADR-0002 §3).** v1 asks on *every* tool call — read-only tools included — so each
+**Gating (ADR-001 §3).** v1 asks on *every* tool call — read-only tools included — so each
 function raises :class:`pydantic_ai.ApprovalRequired` until ``ctx.tool_call_approved`` is set.
 The read-only trio is *tagged* ``read_only=True`` (see
 :data:`FILE_TOOLS_READ_ONLY`) so M3 can auto-allow them later without touching this code;
@@ -25,7 +25,7 @@ A missing / unreadable path, an empty result set, a bad regex, or an unmatchable
 correct itself — the REPL never crashes on bad tool input.
 
 **Sync, not async.** Filesystem access here is local and the tool layer runs **sequentially**
-in v1 (ADR-0002 §7), so there is no concurrency to win back by going async; Pydantic AI already
+in v1 (ADR-001 §7), so there is no concurrency to win back by going async; Pydantic AI already
 runs a sync tool in a worker thread. Keeping these sync keeps the code readable (the
 network/DB-only "async-for-IO" rule from AGENTS.md does not bite on a single local file read).
 """
@@ -93,7 +93,7 @@ def _resolve_in_cwd(cwd: Path, raw: str) -> Path:
 
 
 def _reject_escaping_pattern(pattern: str) -> None:
-    """Reject a glob ``pattern`` that points outside ``cwd`` up front (ADR-0002 §7).
+    """Reject a glob ``pattern`` that points outside ``cwd`` up front (ADR-001 §7).
 
     A leading ``/`` (absolute) or any ``..`` segment can only be aiming outside the project
     tree, so refuse it with a model-readable :class:`pydantic_ai.ModelRetry` before globbing.
@@ -132,7 +132,7 @@ def read(
     offset: int | None = None,
     limit: int | None = None,
 ) -> str:
-    """Read a text file with 1-indexed, numbered lines (ADR-0002 §7).
+    """Read a text file with 1-indexed, numbered lines (ADR-001 §7).
 
     ``offset`` is the 1-indexed first line to print (default ``1``); ``limit`` is the maximum
     number of lines the *caller* asked for (default: all lines from ``offset``). Output is
@@ -193,7 +193,7 @@ def _number_lines(content: str, *, start: int, limit: int | None) -> str | None:
 
 
 def glob(ctx: RunContext[AgentDeps], pattern: str) -> str:
-    """List paths matching shell glob ``pattern`` under ``cwd``, paths only (ADR-0002 §7).
+    """List paths matching shell glob ``pattern`` under ``cwd``, paths only (ADR-001 §7).
 
     Matches are returned **relative to ``cwd``**, one per line, sorted. Supports ``**`` for
     recursive matching. Gated (raises :class:`pydantic_ai.ApprovalRequired` until approved).
@@ -287,14 +287,14 @@ def _grep_candidates(base: Path, *, path: str | None, glob: str | None) -> list[
 
 
 def write(ctx: RunContext[AgentDeps], path: str, content: str) -> str:
-    """Create or overwrite a file with ``content`` (ADR-0002 §7).
+    """Create or overwrite a file with ``content`` (ADR-001 §7).
 
     Resolves ``path`` under ``ctx.deps.cwd`` (an escape — ``..`` / absolute / an in-tree
     symlink pointing outside — is rejected with :class:`pydantic_ai.ModelRetry`). **Missing
     parent directories are created** so the model can scaffold a tree in one call; this is the
     only directory side effect ``write`` has. The file is written as UTF-8.
 
-    Gated (ADR-0002 §3): raises :class:`pydantic_ai.ApprovalRequired` until the call is
+    Gated (ADR-001 §3): raises :class:`pydantic_ai.ApprovalRequired` until the call is
     approved — and crucially *before* the path is resolved or any byte is written, so a denied
     write leaves the target byte-for-byte untouched (it is never created, never truncated).
     """
@@ -312,7 +312,7 @@ def write(ctx: RunContext[AgentDeps], path: str, content: str) -> str:
 
 
 def edit(ctx: RunContext[AgentDeps], path: str, old_string: str, new_string: str) -> str:
-    """Replace a **unique** occurrence of ``old_string`` with ``new_string`` (ADR-0002 §7).
+    """Replace a **unique** occurrence of ``old_string`` with ``new_string`` (ADR-001 §7).
 
     The matching pipeline, in order:
 
@@ -331,7 +331,7 @@ def edit(ctx: RunContext[AgentDeps], path: str, old_string: str, new_string: str
     restored**, and the file is written atomically (temp file + ``os.replace``). Same cwd
     containment as :func:`write`.
 
-    Gated (ADR-0002 §3): raises :class:`pydantic_ai.ApprovalRequired` *before* the file is read
+    Gated (ADR-001 §3): raises :class:`pydantic_ai.ApprovalRequired` *before* the file is read
     or written, so a denied edit leaves it byte-for-byte untouched.
     """
     if not ctx.tool_call_approved:

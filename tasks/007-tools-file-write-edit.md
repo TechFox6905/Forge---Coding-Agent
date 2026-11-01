@@ -16,4 +16,4 @@ Mutating file tools (gated). `edit` uses exact-then-fuzzy matching validated aga
 - [x] A denied write/edit leaves the file untouched.
 
 ## Out of scope
-- Per-realpath mutation queue (unneeded under sequential M1; M3).
+- Per-realpath mutation queue (unneeded under sequential M1).

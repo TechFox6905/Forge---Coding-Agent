@@ -1,6 +1,6 @@
 """Unit tests for :class:`forge.harness.decisions.DecisionChannel`.
 
-The channel is the one-input-surface seam (ADR-0002 §3-4): a mid-turn requester awaits a
+The channel is the one-input-surface seam (ADR-001 §3-4): a mid-turn requester awaits a
 line via :meth:`request`; the input loop fulfils it via :meth:`resolve`. These tests pin the
 pending-decision lifecycle (idle -> pending -> resolved / cancelled) the permission resolver
 and the app loop both depend on, without any prompt_toolkit involvement.

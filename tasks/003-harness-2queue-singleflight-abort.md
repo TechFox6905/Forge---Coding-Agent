@@ -7,7 +7,7 @@ status: done
 # Harness: two-queue, single-flight, cooperative abort
 
 ## Scope
-The interaction loop per [ADR-0002 §4–5](../docs/adr/0002-milestone-1-vanilla-agent-architecture.md): steering + follow-up queues, a phase machine with a single-flight lock spanning a whole turn, and a cooperative abort flag. Wired to a stub multi-step turn handler so semantics are testable before the real agent.
+The interaction loop per [ADR-001 §4–5](../docs/adr/001-milestone-1-core-agent-architecture.md): steering + follow-up queues, a phase machine with a single-flight lock spanning a whole turn, and a cooperative abort flag. Wired to a stub multi-step turn handler so semantics are testable before the real agent.
 
 ## Acceptance criteria
 - [x] `harness/queue.py` holds steering + follow-up `asyncio.Queue`s; `harness/runner.py` owns the phase machine (`idle|dispatching|running`) + single-flight lock (phase set before first `await`).

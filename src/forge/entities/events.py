@@ -1,6 +1,6 @@
 """The canonical event union the harness emits and the TUI renders.
 
-ADR-0002 §4-6: the runner streams *events* to the TUI (it never writes to the terminal
+ADR-001 §4-6: the runner streams *events* to the TUI (it never writes to the terminal
 itself). This module is the single contract for those events — one frozen dataclass per
 event kind, joined into a discriminated union (:data:`Event`) keyed on the ``kind``
 literal. The TUI's :func:`forge.tui.render.render_event` exhaustively matches on it.
@@ -18,7 +18,7 @@ from typing import Literal
 
 @dataclass(frozen=True, slots=True)
 class TurnStarted:
-    """A turn has acquired the single-flight lock and begun (ADR-0002 §4).
+    """A turn has acquired the single-flight lock and begun (ADR-001 §4).
 
     ``prompt`` is the user text that opened the turn; ``turn_id`` is a monotonic id the
     TUI can use to group the events that follow.
@@ -31,10 +31,10 @@ class TurnStarted:
 
 @dataclass(frozen=True, slots=True)
 class TurnFinished:
-    """A turn reached the would-stop boundary with no pending follow-up (ADR-0002 §4).
+    """A turn reached the would-stop boundary with no pending follow-up (ADR-001 §4).
 
     ``aborted`` is ``True`` when the turn stopped early at a boundary because ``Esc`` set
-    the cooperative-abort flag (ADR-0002 §5); completed history is still kept.
+    the cooperative-abort flag (ADR-001 §5); completed history is still kept.
     """
 
     turn_id: int
@@ -63,7 +63,7 @@ class ToolCallStarted:
     """A tool call the model requested, surfaced before execution.
 
     ``args`` is the (already-serialized) argument summary; rendering happens on completion
-    via :class:`ToolResult` to avoid flicker (ADR-0002 §6).
+    via :class:`ToolResult` to avoid flicker (ADR-001 §6).
     """
 
     tool_call_id: str
@@ -89,7 +89,7 @@ class ToolResult:
 
 @dataclass(frozen=True, slots=True)
 class PermissionRequested:
-    """The permission gate is asking the user to approve a tool call (ADR-0002 §3).
+    """The permission gate is asking the user to approve a tool call (ADR-001 §3).
 
     Surfaced at a deferred-tool boundary; the TUI prompts allow/deny. Wired to the real
     gate in task 005 — here it is part of the contract so the union is complete.
@@ -103,7 +103,7 @@ class PermissionRequested:
 
 @dataclass(frozen=True, slots=True)
 class AskUserRequested:
-    """The agent asked the user a free-form question via the AskUser tool (ADR-0002 §7).
+    """The agent asked the user a free-form question via the AskUser tool (ADR-001 §7).
 
     Surfaced at a deferred-tool boundary; the TUI collects the answer. Wired in task 011.
     """
@@ -115,7 +115,7 @@ class AskUserRequested:
 
 @dataclass(frozen=True, slots=True)
 class TaskListUpdated:
-    """The in-memory task list (TodoWrite) changed; the TUI redraws it (ADR-0002 §7).
+    """The in-memory task list (TodoWrite) changed; the TUI redraws it (ADR-001 §7).
 
     ``tasks`` is the full current list of short task descriptions. Wired in task 009.
     """

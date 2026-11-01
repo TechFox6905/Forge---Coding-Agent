@@ -1,4 +1,4 @@
-"""Unit tests for :mod:`forge.context.session_log` — the JSONL session log (ADR-0002 §9).
+"""Unit tests for :mod:`forge.context.session_log` — the JSONL session log (ADR-001 §9).
 
 The session log is the M1 persistence layer: an **append-only JSONL** file per session. Line 0
 is a typed ``session`` header (version, session id, cwd, created_at UTC); every later line is a

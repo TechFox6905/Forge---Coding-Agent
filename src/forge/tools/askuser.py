@@ -1,11 +1,11 @@
-"""The blocking ``ask_user`` tool — the model asks the human a free-form question (ADR-0002 §2,7).
+"""The blocking ``ask_user`` tool — the model asks the human a free-form question (ADR-001 §2,7).
 
 ``ask_user`` is the **one blocking tool**: the model calls it with a ``question``, the TUI
 surfaces that question, the human types a free-text answer, and that line becomes the tool's
 return value (fed straight back to the model on its next leg). It is how the agent gets a
 human decision it cannot make on its own — a missing requirement, a yes/no the user must make.
 
-**Not gated (ADR-0002 §3).** Every *other* tool raises :class:`pydantic_ai.ApprovalRequired`
+**Not gated (ADR-001 §3).** Every *other* tool raises :class:`pydantic_ai.ApprovalRequired`
 and is routed through the permission gate ("may I run this side effect?"). ``ask_user`` is the
 human-interaction tool *itself* — gating it would ask the human "may I ask you something?"
 before asking, double-prompting for no benefit. So it never raises ``ApprovalRequired`` and is
@@ -75,7 +75,7 @@ async def deny_user_question_resolver(question: str) -> str:
 
 
 async def ask_user(ctx: RunContext[AgentDeps], question: str) -> str:
-    """Ask the human ``question`` and return their typed answer (ADR-0002 §2,7).
+    """Ask the human ``question`` and return their typed answer (ADR-001 §2,7).
 
     Emits an :class:`~forge.entities.events.AskUserRequested` event so the TUI renders the
     question, then awaits the human's free-text answer on ``ctx.deps.resolve_user_question`` —

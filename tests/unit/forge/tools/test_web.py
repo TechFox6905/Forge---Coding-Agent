@@ -1,6 +1,6 @@
 """Unit tests for the gated ``web_fetch`` tool (``forge.tools.web``).
 
-ADR-0002 §3,7,10: ``web_fetch`` does a single ``httpx.AsyncClient`` GET under
+ADR-001 §3,7,10: ``web_fetch`` does a single ``httpx.AsyncClient`` GET under
 ``settings.web_fetch_timeout_s``, follows redirects, converts an HTML response to Markdown
 (``<script>`` / ``<style>`` removed) to cut tokens, passes text/plain through as-is, caps the
 response size, and gates on approval (raises :class:`pydantic_ai.ApprovalRequired` until

@@ -7,7 +7,7 @@ status: done
 # Tools: bash execution
 
 ## Scope
-Gated shell execution with a local-executor seam (M8 swaps it for a sandbox).
+Gated shell execution with a local-executor seam (in future swaps it for a sandbox).
 
 ## Acceptance criteria
 - [x] `tools/exec.py` defines the executor seam; `tools/bash.py` runs via `asyncio` subprocess.
@@ -15,4 +15,4 @@ Gated shell execution with a local-executor seam (M8 swaps it for a sandbox).
 - [x] Gated (no dangerous-command classifier in v1 — human approves every call).
 
 ## Out of scope
-- Background jobs; OS sandbox / dangerous-command classifier (M8).
+- Background jobs; OS sandbox / dangerous-command classifier.

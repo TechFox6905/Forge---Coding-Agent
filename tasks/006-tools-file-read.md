@@ -16,4 +16,4 @@ Read-only file tools and the shared output-truncation helper + the tool registry
 - [x] Missing path → model-readable `ModelRetry`.
 
 ## Out of scope
-- Write/edit (task 007); parallel read-only execution (M3).
+- Write/edit (task 007); parallel read-only execution.

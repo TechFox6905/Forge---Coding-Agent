@@ -1,6 +1,6 @@
 """The real Pydantic AI turn handler: ``agent.iter()`` driven as the harness seam.
 
-ADR-0002 §1-4. :class:`AgentTurnHandler` is the :data:`~forge.harness.runner.TurnHandler`
+ADR-001 §1-4. :class:`AgentTurnHandler` is the :data:`~forge.harness.runner.TurnHandler`
 the :class:`~forge.harness.runner.Runner` drives. One *harness turn* fragments into one or
 more *legs*; the handler:
 
@@ -17,7 +17,7 @@ more *legs*; the handler:
   ``FunctionToolCallEvent`` → :class:`~forge.entities.events.ToolCallStarted` (deduped per
   ``tool_call_id`` so a gated call — which is replayed on the resume leg — only announces once)
   and ``FunctionToolResultEvent`` → :class:`~forge.entities.events.ToolResult`, so the live
-  REPL renders a tool panel on completion (ADR-0002 §6). A deferred (gated) call streams only
+  REPL renders a tool panel on completion (ADR-001 §6). A deferred (gated) call streams only
   the *call* event on the pause leg; its *result* event lands on the approved/denied resume leg;
 * **routes gated tool calls through the permission gate (§3).** When a leg resolves to
   :class:`~pydantic_ai.DeferredToolRequests` (a tool raised ``ApprovalRequired``), it asks the
@@ -84,7 +84,7 @@ class AgentTurnHandler:
 
     When a :class:`~forge.context.session_log.SessionLog` is wired (``session_log=``), the
     handler appends each turn's **new** messages to the JSONL log at the would-stop boundary
-    (ADR-0002 §9), so ``forge --resume`` can replay the session. The log is optional: a
+    (ADR-001 §9), so ``forge --resume`` can replay the session. The log is optional: a
     headless / test run with no log left wired runs unchanged. A resumed session seeds
     ``message_history`` (and the persisted-count cursor) so resume continues the conversation
     without re-persisting the replayed prefix.
@@ -103,7 +103,7 @@ class AgentTurnHandler:
         # The running conversation, carried across harness turns (ADR-0002 §1). A resumed
         # session seeds it with the replayed history (``--resume``, task 014).
         self.message_history: list[ModelMessage] = list(message_history or [])
-        # The append-only JSONL session log (ADR-0002 §9); ``None`` disables persistence.
+        # The append-only JSONL session log (ADR-001 §9); ``None`` disables persistence.
         self._session_log = session_log
         # How many messages have already been persisted: the seeded (replayed) prefix counts as
         # persisted so resume never re-writes it, and each turn appends only the messages beyond
@@ -114,7 +114,7 @@ class AgentTurnHandler:
         self._announced_tool_calls: set[str] = set()
 
     async def __call__(self, ctx: TurnContext) -> AsyncGenerator[Boundary, list[str]]:
-        """Run one harness turn as a sequence of legs (ADR-0002 §3-4).
+        """Run one harness turn as a sequence of legs (ADR-001 §3-4).
 
         Each model request is preceded by a ``MODEL_REQUEST`` boundary where the runner
         drains steering. A leg either resolves to plain text (the turn would stop) or to a
@@ -181,7 +181,7 @@ class AgentTurnHandler:
         A deferred resume leg carries ``deferred_tool_results`` and no new ``user_prompt``, so
         steering cannot ride the prompt — it is appended directly to ``message_history`` as a
         :class:`~pydantic_ai.messages.UserPromptPart`, which the model then sees on the resume
-        leg (ADR-0002 §4; closes the task-004 carryover).
+        leg (ADR-001 §4; closes the task-004 carryover).
         """
         if not steering:
             return
@@ -190,7 +190,7 @@ class AgentTurnHandler:
         self.message_history.append(ModelRequest(parts=[UserPromptPart(content=content)]))
 
     def _persist_turn(self) -> None:
-        """Append the messages added since the last persist to the session log (ADR-0002 §9).
+        """Append the messages added since the last persist to the session log (ADR-001 §9).
 
         Called at each would-stop boundary: the slice of ``message_history`` beyond the
         persisted-count cursor is *this* turn's new messages, which are appended as one typed
@@ -295,7 +295,7 @@ class AgentTurnHandler:
                 self._emit_for_stream_event(ctx, event)
 
     async def _stream_tool_node(self, ctx: TurnContext, node: object, run: object) -> None:
-        """Stream one call-tools node, emitting ToolCallStarted / ToolResult (ADR-0002 §6).
+        """Stream one call-tools node, emitting ToolCallStarted / ToolResult (ADR-001 §6).
 
         Pydantic AI's call-tools node streams a ``FunctionToolCallEvent`` when a tool call
         begins and a ``FunctionToolResultEvent`` when it returns. We map those to the canonical

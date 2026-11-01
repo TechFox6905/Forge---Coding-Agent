@@ -147,7 +147,7 @@ activemq-data/
 # SageMath parsed files
 *.sage.py
 
-# forge runtime state: JSONL session logs (--resume) and local persistence (ADR-0002 §9).
+# forge runtime state: JSONL session logs (--resume) and local persistence (ADR-001 §9).
 # Authored project skills (.forge/skills/) ARE source — track them; everything else stays ignored.
 .forge/*
 !.forge/skills/
@@ -222,3 +222,5 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
+# Temporary files 
+temp/

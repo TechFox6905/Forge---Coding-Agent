@@ -1,6 +1,6 @@
 """Unit tests for the gated ``bash`` tool (``forge.tools.bash``).
 
-ADR-0002 §3,7,10: ``bash`` runs a shell command through the executor seam under
+ADR-001 §3,7,10: ``bash`` runs a shell command through the executor seam under
 ``ctx.deps.cwd``, gates on approval (raises :class:`pydantic_ai.ApprovalRequired` until
 approved — the human-in-the-loop *is* the safety gate; no dangerous-command classifier in v1),
 enforces ``settings.bash_timeout_s``, and truncates each stream through

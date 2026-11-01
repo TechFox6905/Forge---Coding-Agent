@@ -1,6 +1,6 @@
 """Unit tests for :mod:`forge.agent.loop` — the real Pydantic AI turn handler.
 
-ADR-0002 §1-4: the loop drives ``agent.iter()`` as the harness
+ADR-001 §1-4: the loop drives ``agent.iter()`` as the harness
 :data:`~forge.harness.runner.TurnHandler`. It streams model nodes into
 :mod:`forge.entities.events`, yields the ``MODEL_REQUEST`` / ``WOULD_STOP`` boundaries the
 :class:`~forge.harness.runner.Runner` expects, drains steering into ``message_history``
@@ -169,7 +169,7 @@ async def test_message_history_carries_across_turns(agent):
 
 
 async def test_steering_is_appended_before_the_model_request(agent):
-    """ADR-0002 §4: steering drained at the model-request boundary lands in the history.
+    """ADR-001 §4: steering drained at the model-request boundary lands in the history.
 
     The handler receives the drained steering messages back from the runner *at* the
     model-request boundary and must append them as user messages to ``message_history``
@@ -266,7 +266,7 @@ async def test_thinking_deltas_become_thinking_events(agent):
 
 
 async def test_tool_call_emits_started_and_result_events_and_renders_a_panel(agent):
-    """ADR-0002 §6: a tool-calling turn emits ToolCallStarted + ToolResult and renders a panel.
+    """ADR-001 §6: a tool-calling turn emits ToolCallStarted + ToolResult and renders a panel.
 
     A non-gated tool call streams through the call-tools node; the loop must emit a
     ``ToolCallStarted`` (name + args summary) when the call begins and a ``ToolResult`` (the
@@ -315,7 +315,7 @@ async def test_gated_tool_is_announced_once_across_the_deferred_resume(gated_age
 
     The deferred-pause leg streams the call event; the approved resume leg streams it again
     plus the result. The loop dedupes the started event per ``tool_call_id`` so the user sees a
-    single announce and a single result panel (no flicker, ADR-0002 §6).
+    single announce and a single result panel (no flicker, ADR-001 §6).
     """
     emitted: list[events.Event] = []
 
@@ -379,7 +379,7 @@ def _user_messages_seen(messages: list[ModelMessage]) -> list[str]:
 
 
 async def test_gated_tool_pauses_and_emits_permission_requested(gated_agent):
-    """ADR-0002 §3: a gated call pauses the run and surfaces a PermissionRequested event."""
+    """ADR-001 §3: a gated call pauses the run and surfaces a PermissionRequested event."""
     emitted: list[events.Event] = []
     asked: list[PermissionRequest] = []
 
@@ -432,7 +432,7 @@ async def test_approval_resumes_and_executes_the_tool(gated_agent):
 
 
 async def test_denial_feeds_a_tooldenied_result_back_to_the_model(gated_agent):
-    """A DENY returns a denial tool-result the model sees on the next leg (ADR-0002 §3)."""
+    """A DENY returns a denial tool-result the model sees on the next leg (ADR-001 §3)."""
     emitted: list[events.Event] = []
 
     async def denying_resolver(request: PermissionRequest) -> PermissionDecision:
@@ -511,7 +511,7 @@ async def test_steering_message_reaches_the_model_at_the_deferred_resume(gated_a
 
     A gated call pauses the run; before the resume leg the runner drains steering at the
     model-request boundary. That steering must be appended to history as a user message so
-    the model sees it on the resume leg (ADR-0002 §4).
+    the model sees it on the resume leg (ADR-001 §4).
     """
     emitted: list[events.Event] = []
 
@@ -548,7 +548,7 @@ async def test_steering_message_reaches_the_model_at_the_deferred_resume(gated_a
 
 
 async def test_single_flight_lock_spans_the_whole_multi_leg_deferred_turn(gated_agent):
-    """ADR-0002 §4: the single-flight lock spans the full deferred (multi-leg) turn.
+    """ADR-001 §4: the single-flight lock spans the full deferred (multi-leg) turn.
 
     Driven through the *real* Runner: a gated tool makes the turn fragment into a request
     leg + a deferred resume leg. While the turn is in flight a second submit must enqueue
@@ -609,7 +609,7 @@ def _ask_user_then_text(
 
 
 async def test_ask_user_answer_reaches_the_model_as_the_tool_result(agent):
-    """ADR-0002 §2,7: a forced ask_user call surfaces the question and the typed answer.
+    """ADR-001 §2,7: a forced ask_user call surfaces the question and the typed answer.
 
     A fake ``resolve_user_question`` supplies the answer; it must (a) be emitted as an
     ``AskUserRequested`` event so the TUI renders the question, and (b) come back to the model
@@ -685,7 +685,7 @@ async def test_ask_user_model_retries_headless_and_the_turn_still_finishes(agent
 
 
 async def test_handler_persists_each_turn_to_the_session_log(agent, tmp_path):
-    """ADR-0002 §9: when a SessionLog is wired, each turn appends its new messages.
+    """ADR-001 §9: when a SessionLog is wired, each turn appends its new messages.
 
     The handler is given a real :class:`~forge.context.session_log.SessionLog`; after a turn
     finishes, the session file must carry that turn's messages so a later ``--resume`` replays

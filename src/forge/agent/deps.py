@@ -1,4 +1,4 @@
-"""The dependency object Pydantic AI injects into the agent run (ADR-0002 §1-3).
+"""The dependency object Pydantic AI injects into the agent run (ADR-001 §1-3).
 
 Pydantic AI passes whatever you hand to ``agent.iter(deps=...)`` into every tool call and
 instruction function as ``ctx.deps``. :class:`AgentDeps` is that object for ``forge``.

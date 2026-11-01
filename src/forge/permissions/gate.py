@@ -1,4 +1,4 @@
-"""The permission gate: the ask/allow/deny **policy** object (ADR-0002 §3).
+"""The permission gate: the ask/allow/deny **policy** object (ADR-001 §3).
 
 :class:`PermissionGate` answers one question — given a
 :class:`~forge.entities.permissions.PermissionRequest`, should the tool run? In v1 the
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 
 class PermissionGate:
-    """Decide allow/ask/deny for a tool call (ADR-0002 §3); v1 always asks.
+    """Decide allow/ask/deny for a tool call (ADR-001 §3); v1 always asks.
 
     Holds the active :class:`~forge.permissions.types.PermissionMode` (only ``ASK`` in v1).
     Stateless beyond that mode, so one instance is shared for a whole session.

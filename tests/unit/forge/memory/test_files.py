@@ -1,4 +1,4 @@
-"""Unit tests for :func:`forge.memory.files.discover_memory_files` (ADR-0002 §8, Fix 1).
+"""Unit tests for :func:`forge.memory.files.discover_memory_files` (ADR-001 §8, Fix 1).
 
 Discovery has two kinds of memory, found differently:
 

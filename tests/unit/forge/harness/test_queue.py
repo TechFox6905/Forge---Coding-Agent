@@ -1,4 +1,4 @@
-"""Unit tests for the steering + follow-up interaction queues (ADR-0002 §4)."""
+"""Unit tests for the steering + follow-up interaction queues (ADR-001 §4)."""
 
 from forge.harness.queue import InteractionQueues
 

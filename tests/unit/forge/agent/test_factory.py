@@ -1,6 +1,6 @@
 """Unit tests for :func:`forge.agent.factory.build_agent`.
 
-ADR-0002 §1-2: the agent is a Pydantic AI :class:`~pydantic_ai.Agent` on Gemini, built via
+ADR-001 §1-2: the agent is a Pydantic AI :class:`~pydantic_ai.Agent` on Gemini, built via
 the ``google-gla`` API-key path with the model id from ``settings.gemini_model`` and
 ``output_type=[str, DeferredToolRequests]`` so the deferred-tool seam is ready for task 005
 even though chat-only has no tools. These tests assert the *construction contract* without

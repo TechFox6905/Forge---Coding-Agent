@@ -1,6 +1,6 @@
 """Unit tests for :class:`forge.permissions.gate.PermissionGate`.
 
-ADR-0002 §3: the gate is the **policy** object. Its v1 policy is *ask on every tool call*
+ADR-001 §3: the gate is the **policy** object. Its v1 policy is *ask on every tool call*
 — ``check()`` always returns ``ASK`` under the ``ASK`` mode, regardless of the tool's
 ``read_only`` flag (the flag is recorded for M3's auto-allow but ignored for the v1
 decision). The gate does **not** own the terminal UI; resolving an ASK into allow/deny is

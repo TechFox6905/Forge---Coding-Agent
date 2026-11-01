@@ -1,4 +1,4 @@
-"""The gated ``todo_write`` tool — the in-memory TodoWrite task list (ADR-0002 §7).
+"""The gated ``todo_write`` tool — the in-memory TodoWrite task list (ADR-001 §7).
 
 ``todo_write`` lets the model maintain a short to-do list **within a session** so it (and the
 developer watching the TUI) can track multi-step work. It follows TodoWrite *replace* semantics:
@@ -13,7 +13,7 @@ then announces with a :class:`~forge.entities.events.TaskListUpdated` event so t
 checklist. The event carries already-status-marked lines (``[x]`` completed, ``[~]`` in progress,
 ``[ ]`` pending) so the renderer shows a sensible checklist without re-deriving the markers.
 
-It is **gated** like every mutating tool (ADR-0002 §3): it has session side effects, so it raises
+It is **gated** like every mutating tool (ADR-001 §3): it has session side effects, so it raises
 :class:`pydantic_ai.ApprovalRequired` until the call is approved and is registered ``read_only=False``
 (still asked on every call in v1). In-memory, per-run only — no cross-session persistence (later).
 """
@@ -44,14 +44,14 @@ _STATUS_MARKERS: dict[str, str] = {
 
 
 def todo_write(ctx: RunContext[AgentDeps], tasks: list[Task]) -> str:
-    """Replace the session task list with ``tasks`` and redraw it in the TUI (ADR-0002 §7).
+    """Replace the session task list with ``tasks`` and redraw it in the TUI (ADR-001 §7).
 
     ``tasks`` is the **full desired list** (TodoWrite replace semantics — pass every task every
     call, not just the changes); each item is validated by :class:`~forge.entities.task.Task`.
     The per-run store on ``ctx.deps.task_store`` is overwritten in place and a
     :class:`~forge.entities.events.TaskListUpdated` event is emitted so the checklist redraws.
 
-    Gated (ADR-0002 §3): raises :class:`pydantic_ai.ApprovalRequired` until the call is approved —
+    Gated (ADR-001 §3): raises :class:`pydantic_ai.ApprovalRequired` until the call is approved —
     and *before* the store is touched — so a denied call never mutates the task list. Returns a
     short confirmation string the model sees on its next leg.
     """

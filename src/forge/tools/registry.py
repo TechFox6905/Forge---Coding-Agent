@@ -1,4 +1,4 @@
-"""The flat tool registry — the one place tools are declared and wired (ADR-0002 §7).
+"""The flat tool registry — the one place tools are declared and wired (ADR-001 §7).
 
 M1 keeps tooling deliberately flat: **no plugin machinery, no discovery, no MCP** (that is
 M12). The registry is a plain list of :class:`ToolSpec` — one per tool — and does exactly two
@@ -99,7 +99,7 @@ TOOL_READ_ONLY: dict[str, bool] = {spec.name: spec.read_only for spec in TOOL_SP
 
 
 def register_tools(agent: Agent[AgentDeps, str | DeferredToolRequests]) -> None:
-    """Register every :data:`TOOL_SPECS` function on ``agent`` (ADR-0002 §7).
+    """Register every :data:`TOOL_SPECS` function on ``agent`` (ADR-001 §7).
 
     Called once by the factory. Each tool takes ``ctx: RunContext[AgentDeps]`` first, so it is
     registered with ``agent.tool`` (context-aware), not ``agent.tool_plain``.

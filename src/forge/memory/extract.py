@@ -1,4 +1,4 @@
-"""On-exit memory write-back: one cheap summary appended to ``MEMORY.md`` (ADR-0002 §8).
+"""On-exit memory write-back: one cheap summary appended to ``MEMORY.md`` (ADR-001 §8).
 
 The deliberately minimal M1 memory-write loop. When a session ends, one cheap Gemini call
 summarizes the whole conversation into a **single sentence**, which is appended (dated) to the
@@ -75,7 +75,7 @@ def _utc_now() -> datetime:
 async def summarize_session(
     messages: list[ModelMessage], *, model_or_settings: Model | Settings
 ) -> str | None:
-    """Summarize a session into one sentence with a single cheap LLM call (ADR-0002 §8).
+    """Summarize a session into one sentence with a single cheap LLM call (ADR-001 §8).
 
     Renders ``messages`` to a plain-text transcript (user prompts + assistant text) and asks a
     tiny one-shot :class:`~pydantic_ai.Agent` to compress it into one sentence. Returns that
@@ -108,7 +108,7 @@ async def summarize_session(
 
 
 def append_session_summary(cwd: Path, summary: str, *, now: datetime) -> None:
-    """Append a dated summary line to ``cwd/.forge/MEMORY.md`` and trim to the caps (ADR-0002 §8).
+    """Append a dated summary line to ``cwd/.forge/MEMORY.md`` and trim to the caps (ADR-001 §8).
 
     "Project root" is the launch ``cwd``: the file written is ``cwd/.forge/MEMORY.md`` — the
     single harness MEMORY.md, created (with its ``.forge/`` parent) if absent. The summary is
@@ -119,7 +119,7 @@ def append_session_summary(cwd: Path, summary: str, *, now: datetime) -> None:
 
     ``now`` is injected and **must be timezone-aware** (UTC) — a naive datetime is rejected, the
     same boundary rule the rest of the package follows. Filesystem reads/writes are local and the
-    tool layer is sequential in v1 (ADR-0002 §7,10), so this stays sync.
+    tool layer is sequential in v1 (ADR-001 §7,10), so this stays sync.
     """
     if now.tzinfo is None:
         raise ValueError("now must be a timezone-aware (UTC) datetime, not naive")
@@ -141,7 +141,7 @@ def append_session_summary(cwd: Path, summary: str, *, now: datetime) -> None:
 
 
 async def extract_on_exit(messages: list[ModelMessage], cwd: Path) -> None:
-    """Summarize the session and append it to ``MEMORY.md`` — fully non-fatal (ADR-0002 §8).
+    """Summarize the session and append it to ``MEMORY.md`` — fully non-fatal (ADR-001 §8).
 
     The shutdown orchestrator: summarize the conversation, and if that yields a sentence, append
     it (dated) to the project-root ``MEMORY.md``. It must **never raise and never block process

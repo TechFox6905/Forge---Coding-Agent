@@ -1,9 +1,9 @@
-"""The mid-turn decision channel: one input surface, a pending-decision mode (ADR-0002 §3-4).
+"""The mid-turn decision channel: one input surface, a pending-decision mode (ADR-001 §3-4).
 
 A turn sometimes has to stop and ask the human a question *before it can continue* — the
 permission gate (task 005) is the first instance; ``AskUser`` (task 011) is the next. The
 TUI has exactly **one** input surface: the main ``prompt_async()`` loop, which must stay in
-flight for the whole turn so the user can steer (ADR-0002 §4). Opening a *second* concurrent
+flight for the whole turn so the user can steer (ADR-001 §4). Opening a *second* concurrent
 ``prompt_async()`` to collect the answer is illegal — prompt_toolkit guards a single
 ``Application`` with ``assert not self._is_running`` — and deadlocks the REPL.
 
@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 class DecisionChannel:
-    """A one-at-a-time channel for a mid-turn request the human must answer (ADR-0002 §3-4).
+    """A one-at-a-time channel for a mid-turn request the human must answer (ADR-001 §3-4).
 
     The requester (permission resolver / ``AskUser``) ``await``s :meth:`request`; the TUI's
     single input loop fulfils it via :meth:`resolve` with the next submitted line. This is the

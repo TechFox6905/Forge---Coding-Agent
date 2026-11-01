@@ -1,4 +1,4 @@
-"""Unit tests for :mod:`forge.memory.extract` — the on-exit memory write-back (ADR-0002 §8).
+"""Unit tests for :mod:`forge.memory.extract` — the on-exit memory write-back (ADR-001 §8).
 
 The extractor is the deliberately minimal M1 write-back: one cheap LLM call summarizes the
 session into a single sentence, which is appended (dated) to the project-root ``MEMORY.md`` and
@@ -331,7 +331,7 @@ async def test_extract_on_exit_never_raises_when_append_blows_up(tmp_path: Path,
 
 
 # --------------------------------------------------------------------------------------------
-# Round-trip: a written summary is discoverable by assemble_memory next session (ADR-0002 §8)
+# Round-trip: a written summary is discoverable by assemble_memory next session (ADR-001 §8)
 # --------------------------------------------------------------------------------------------
 
 

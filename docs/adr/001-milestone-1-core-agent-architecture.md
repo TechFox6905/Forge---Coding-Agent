@@ -8,7 +8,7 @@ Milestone 1 establishes the first functional vertical of `forge`: a terminal REP
 
 The architecture was examined decision by decision and cross-validated against three reference harnesses—claude-code, opencode, and pi—from the research wiki. Since these decisions are closely connected, the agent loop, permissions, queueing, TUI, memory, and persistence are documented together in **a single milestone-architecture ADR** rather than separate ADRs for individual tasks.
 
-The ordered implementation tasks are available in [`tasks/`](../../tasks/) under the `m1-vanilla-agent` feature. This ADR documents the *reasoning behind the decisions*. See [ADR-0001](0001-record-architecture-decisions.md).
+The ordered implementation tasks are available in [`tasks/`](../../tasks/) under the `m1-vanilla-agent` feature. 
 
 ## Decision
 

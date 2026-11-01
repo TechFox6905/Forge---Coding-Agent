@@ -21,7 +21,7 @@ from forge.tui.app import run_app  # noqa: E402
 logger = logging.getLogger(__name__)
 
 # The one friendly line shown when no Gemini key is configured, instead of the raw
-# ``pydantic_ai.UserError`` traceback ``build_agent()`` would otherwise raise (ADR-0002 §1).
+# ``pydantic_ai.UserError`` traceback ``build_agent()`` would otherwise raise (ADR-001 §1).
 _NO_KEY_MESSAGE = (
     "Forge: set GEMINI_API_KEY in your environment or .env to start (see .env.example)."
 )
@@ -50,7 +50,7 @@ def cli(resume: str | None) -> None:
 
     # Launch the REPL wired to the harness; the bare ``--resume`` flag arrives as "latest", a
     # named ``--resume <id>`` as that id, and no flag as None (a fresh session). run_app loads
-    # the matching session log and seeds the conversation (ADR-0002 §9, task 014).
+    # the matching session log and seeds the conversation (ADR-001 §9, task 014).
     asyncio.run(run_app(resume=resume))
 
 

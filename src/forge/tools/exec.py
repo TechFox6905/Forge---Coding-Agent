@@ -1,9 +1,9 @@
-"""The command-executor seam — the one real abstraction in the tool layer (ADR-0002 §7,10).
+"""The command-executor seam — the one real abstraction in the tool layer (ADR-001 §7,10).
 
 ``bash`` (task 008) does not spawn subprocesses itself; it asks a :class:`CommandExecutor` to
 run a command and hands back the result. M1 ships exactly one implementation,
 :class:`LocalExecutor` (a local ``asyncio`` subprocess); **M8 swaps in a Docker / Modal
-sandbox behind this same ``run`` method** without touching ``bash`` (ADR-0002 §7, AGENTS.md:
+sandbox behind this same ``run`` method** without touching ``bash`` (ADR-001 §7, AGENTS.md:
 "Sandbox is the one real abstraction"). Keep this module **infra-agnostic** — it knows about a
 command string, a working directory, a timeout, and the four fields of an :class:`ExecResult`.
 It knows nothing about the agent, truncation, or permissions.
@@ -79,7 +79,7 @@ def _find_bash() -> str:
 
 @dataclass(frozen=True, slots=True)
 class ExecResult:
-    """The outcome of running one command (ADR-0002 §7).
+    """The outcome of running one command (ADR-001 §7).
 
     ``stdout`` / ``stderr`` are the captured streams decoded as UTF-8 (undecodable bytes are
     replaced, never crash). ``exit_code`` is the process exit status (``-N`` for "killed by
@@ -95,7 +95,7 @@ class ExecResult:
 
 
 class CommandExecutor(Protocol):
-    """The seam ``bash`` runs commands through (ADR-0002 §7; M8 swaps the implementation).
+    """The seam ``bash`` runs commands through (ADR-001 §7; M8 swaps the implementation).
 
     One method: :meth:`run` a command string in ``cwd`` with a wall-clock ``timeout_s`` and
     return an :class:`ExecResult`. M1 has :class:`LocalExecutor`; M8 adds a sandboxed executor

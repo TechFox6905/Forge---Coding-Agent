@@ -1,4 +1,4 @@
-"""End-to-end regression tests for the real ``run_app`` mid-turn HITL flows (ADR-0002 §2-4,7).
+"""End-to-end regression tests for the real ``run_app`` mid-turn HITL flows (ADR-001 §2-4,7).
 
 These close the gap that let the concurrent-prompt deadlock ship: every other test uses a
 stub/headless resolver against an idle session, so the collision between the resolver's input
@@ -57,7 +57,7 @@ _AFTER_ANSWER_TEXT = "ACK-ANSWER-RECEIVED"
 
 @pytest.fixture(autouse=True)
 def sessions_dir(tmp_path, monkeypatch):
-    """Redirect the JSONL session log under a per-test tmp dir (ADR-0002 §9, task 014).
+    """Redirect the JSONL session log under a per-test tmp dir (ADR-001 §9, task 014).
 
     ``run_app`` now opens a session log under ``settings.sessions_dir``; without this every e2e
     test would write into the repo's real ``.forge/sessions``. Returns the dir so the tests
@@ -364,7 +364,7 @@ async def test_run_app_renders_you_quote_forge_prefix_and_capital_goodbye(monkey
 
 
 async def test_run_app_persists_the_session_to_a_jsonl_log(monkeypatch, sessions_dir):
-    """ADR-0002 §9: ``run_app`` opens a session log and persists the turn's messages.
+    """ADR-001 §9: ``run_app`` opens a session log and persists the turn's messages.
 
     A fresh ``run_app`` opens a new ``.jsonl`` file under ``settings.sessions_dir``; after a
     turn finishes, replaying that file yields the conversation (the user prompt is in it). No

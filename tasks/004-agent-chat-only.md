@@ -7,7 +7,7 @@ status: done
 # Agent loop: chat-only (Pydantic AI + Gemini)
 
 ## Scope
-The Pydantic AI agent on Gemini with streaming, no tools — the first real round-trip. Replaces the stub turn handler. See [ADR-0002 §1–2](../docs/adr/0002-milestone-1-vanilla-agent-architecture.md).
+The Pydantic AI agent on Gemini with streaming, no tools — the first real round-trip. Replaces the stub turn handler. See [ADR-001 §1–2](../docs/adr/001-milestone-1-core-agent-architecture.md).
 
 ## Acceptance criteria
 - [x] `agent/factory.py` builds `Agent(output_type=[str, DeferredToolRequests], deps_type=AgentDeps)` on Gemini via the `google-gla:` API-key path; model id from `settings.gemini_model`.

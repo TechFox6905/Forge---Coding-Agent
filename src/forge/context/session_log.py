@@ -1,4 +1,4 @@
-"""Append-only JSONL session log with replay (ADR-0002 §9).
+"""Append-only JSONL session log with replay (ADR-001 §9).
 
 The M1 persistence layer: every REPL session gets one JSONL file at
 ``{settings.sessions_dir}/{utc-ts}_{uuid}.jsonl``. **Line 0** is a typed ``session`` header
@@ -20,7 +20,7 @@ makes both **deterministic in tests**. The defaults (:func:`_utc_now`, :func:`uu
 production clock/id source.
 
 Why the file I/O is **sync**, not async: each call appends a single small line to a local file
-and the tool layer is sequential in v1 (ADR-0002 §7,10), so there is no concurrent writer to
+and the tool layer is sequential in v1 (ADR-001 §7,10), so there is no concurrent writer to
 interleave with and nothing to overlap with other I/O — the same rationale the sibling
 :mod:`forge.memory.extract` filesystem write-back uses. Network and the durable
 (SQLite/Kitaru) store are later milestones.
@@ -63,7 +63,7 @@ def _utc_now() -> datetime:
 
 @dataclass(slots=True)
 class SessionLog:
-    """The writer side of a session's JSONL log: open once, append per turn (ADR-0002 §9).
+    """The writer side of a session's JSONL log: open once, append per turn (ADR-001 §9).
 
     Constructed via :meth:`create` (which writes the header); thereafter :meth:`append_turn`
     appends one typed ``messages`` line per turn. ``path`` is the file it owns.
@@ -88,7 +88,7 @@ class SessionLog:
         schema ``version``, the ``session_id``, the launch ``cwd``, and the UTC ``created_at``.
 
         ``now`` **must be timezone-aware UTC** — a naive datetime is rejected, the package-wide
-        boundary rule (ADR-0002 §10).
+        boundary rule (ADR-001 §10).
         """
         resolved_now = now or _utc_now()
         if resolved_now.tzinfo is None:
@@ -131,7 +131,7 @@ class SessionLog:
 
 
 def load(path: Path) -> list[ModelMessage]:
-    """Replay a session file into a flat ``message_history`` list (ADR-0002 §9).
+    """Replay a session file into a flat ``message_history`` list (ADR-001 §9).
 
     Reads every line, skips the header and any line that is not a well-formed ``messages``
     entry, deserializes each surviving batch via
@@ -154,7 +154,7 @@ def load(path: Path) -> list[ModelMessage]:
 
 
 def load_latest(sessions_dir: Path) -> list[ModelMessage] | None:
-    """Replay the most recent session file in ``sessions_dir`` (ADR-0002 §9).
+    """Replay the most recent session file in ``sessions_dir`` (ADR-001 §9).
 
     "Most recent" is the lexicographic max of the timestamped filenames (the ``%Y%m%dT%H%M%SZ``
     prefix is sortable). Returns the replayed history, or ``None`` when there is no session to

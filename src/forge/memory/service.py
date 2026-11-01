@@ -1,4 +1,4 @@
-"""Assemble the project memory block injected into the agent's instructions (ADR-0002 §8).
+"""Assemble the project memory block injected into the agent's instructions (ADR-001 §8).
 
 :func:`assemble_memory` is the bridge between :func:`forge.memory.files.discover_memory_files`
 and the dynamic ``@agent.instructions`` hook in :mod:`forge.agent.factory`. It:
@@ -21,7 +21,7 @@ between discovery and read (or be a broken symlink); memory is best-effort conte
 dependency, so a bad file is dropped and assembly continues. An empty discovery (or every file
 unreadable) returns ``""`` — the factory then injects nothing beyond the static base prompt.
 
-Sync, like discovery: local file reads, sequential tool layer (ADR-0002 §7,10).
+Sync, like discovery: local file reads, sequential tool layer (ADR-001 §7,10).
 """
 
 from __future__ import annotations
@@ -45,7 +45,7 @@ assert _CAPPED_FILENAME in MEMORY_FILENAMES
 
 
 def assemble_memory(cwd: Path) -> str:
-    """Read the discovered memory files and return the prompt block to inject (ADR-0002 §8).
+    """Read the discovered memory files and return the prompt block to inject (ADR-001 §8).
 
     Files are read root-most → cwd-most (discovery order) and joined with a blank line between
     them, each under a ``# From <abs path>`` provenance header. ``MEMORY.md`` is clipped to the
@@ -106,7 +106,7 @@ def _cap(content: str) -> str:
 def clip_lines_to_budget(
     lines: list[str], *, max_lines: int, max_bytes: int, keep: Literal["head", "tail"]
 ) -> str:
-    """Clip ``lines`` to a line AND byte budget, keeping whole lines from one end (ADR-0002 §8).
+    """Clip ``lines`` to a line AND byte budget, keeping whole lines from one end (ADR-001 §8).
 
     The shared core of the two memory budgeters — :func:`_cap` here (``keep="head"``: clip a
     file's leading lines so the model reads the start) and

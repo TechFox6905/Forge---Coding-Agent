@@ -1,16 +1,16 @@
 """The runner: turn lifecycle, single-flight phase machine, drains, cooperative abort.
 
-This is the heart of the harness (ADR-0002 §4-5). It owns:
+This is the heart of the harness (ADR-001 §4-5). It owns:
 
 * a **phase machine** — ``idle -> dispatching -> running -> idle`` — guarded by a
   **single-flight lock** that spans an entire (possibly multi-leg) turn. The phase is set
   *synchronously, before the first ``await``* in :meth:`Runner.submit`, so a racing second
   submit observes "busy" with no window to start a parallel turn;
 * the **two drain points** — steering is drained *before each model-request leg*;
-  follow-up is drained *only at the would-stop boundary* (ADR-0002 §4);
+  follow-up is drained *only at the would-stop boundary* (ADR-001 §4);
 * a **cooperative-abort flag** — :meth:`Runner.abort` (``Esc``) makes the turn stop at the
   *next* boundary, keep the history emitted so far, clear the queues, and return to idle
-  (ADR-0002 §5). It never interrupts an in-flight stream or tool.
+  (ADR-001 §5). It never interrupts an in-flight stream or tool.
 
 The agent loop is decoupled behind the **turn handler**: an async generator that ``yield``s
 a :class:`Boundary` at each model-request / would-stop point and receives back the messages
@@ -39,7 +39,7 @@ EventSink = Callable[[events.Event], None]
 
 
 class Phase(enum.Enum):
-    """The single-flight phase machine (ADR-0002 §4).
+    """The single-flight phase machine (ADR-001 §4).
 
     ``DISPATCHING`` is the synchronous window between accepting a turn and the turn task
     actually starting — it exists so the busy state is observable *before the first await*.
@@ -51,7 +51,7 @@ class Phase(enum.Enum):
 
 
 class Boundary(enum.Enum):
-    """A point in a turn where the runner may inject queued input or stop (ADR-0002 §4).
+    """A point in a turn where the runner may inject queued input or stop (ADR-001 §4).
 
     The turn handler ``yield``s one of these to hand control back to the runner:
 
@@ -116,7 +116,7 @@ class Runner:
         return 1 if self._turn_task is not None and not self._turn_task.done() else 0
 
     async def submit(self, text: str, intent: InputIntent) -> None:
-        """Route one user submission by intent (ADR-0002 §4).
+        """Route one user submission by intent (ADR-001 §4).
 
         On idle this *starts* a turn; while busy it enqueues the text on the steering or
         follow-up queue (never a parallel turn). The phase is set **synchronously here,
@@ -181,7 +181,7 @@ class Runner:
         finally:
             await agen.aclose()
             if aborted:
-                # ADR-0002 §5: keep completed history, drop pending input, back to idle.
+                # ADR-001 §5: keep completed history, drop pending input, back to idle.
                 self.queues.clear()
             self._on_event(events.TurnFinished(turn_id=turn_id, aborted=aborted))
             self._phase = Phase.IDLE

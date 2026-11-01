@@ -1,6 +1,6 @@
 """Unit tests for the command-executor seam (``forge.tools.exec``).
 
-ADR-0002 §7,10: ``bash`` runs commands through a :class:`CommandExecutor`; M1 ships
+ADR-001 §7,10: ``bash`` runs commands through a :class:`CommandExecutor`; M1 ships
 :class:`LocalExecutor` (a local ``asyncio`` subprocess), and M8 swaps a sandbox in behind the
 same ``run`` method. These tests pin the executor's contract directly — no model, no agent —
 with **real short commands** so they are hermetic and fast:

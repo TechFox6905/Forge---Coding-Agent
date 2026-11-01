@@ -7,7 +7,7 @@ status: done
 # Tools: AskUser (deferred)
 
 ## Scope
-The one blocking tool — the model asks the human a question, routed through the same deferred-pause path as approvals ([ADR-0002 §2](../docs/adr/0002-milestone-1-vanilla-agent-architecture.md)).
+The one blocking tool — the model asks the human a question, routed through the same deferred-pause path as approvals ([ADR-001 §2](../docs/adr/001-milestone-1-core-agent-architecture.md)).
 
 ## Acceptance criteria
 - [x] `tools/askuser.py` `ask_user(question)` produces a deferred request that pauses the turn and surfaces the question in the TUI.

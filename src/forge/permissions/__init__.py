@@ -1,4 +1,4 @@
-"""Permissions: the ask/allow/deny policy around every tool call (ADR-0002 §3).
+"""Permissions: the ask/allow/deny policy around every tool call (ADR-001 §3).
 
 The **gate** (:mod:`forge.permissions.gate`) is the *policy* object — given a
 :class:`~forge.entities.permissions.PermissionRequest` it returns a

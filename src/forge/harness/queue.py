@@ -1,4 +1,4 @@
-"""The two interaction queues that back the Priority Gate (ADR-0002 §4).
+"""The two interaction queues that back the Priority Gate (ADR-001 §4).
 
 forge separates two kinds of user input that arrive *while a turn is running*:
 
@@ -47,7 +47,7 @@ class InteractionQueues:
         return _drain(self.follow_up)
 
     def clear(self) -> None:
-        """Discard everything in both queues (used on cooperative abort, ADR-0002 §5)."""
+        """Discard everything in both queues (used on cooperative abort, ADR-001 §5)."""
         _drain(self.steering)
         _drain(self.follow_up)
 

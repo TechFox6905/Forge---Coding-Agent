@@ -1,4 +1,4 @@
-"""The in-memory TodoWrite task item the model maintains within a session (ADR-0002 §7).
+"""The in-memory TodoWrite task item the model maintains within a session (ADR-001 §7).
 
 :class:`Task` is one entry in the per-run task list the ``todo_write`` tool rewrites. It mirrors
 the frozen + slotted style of :mod:`forge.entities.events` and :mod:`forge.entities.permissions`
@@ -25,7 +25,7 @@ _VALID_STATUSES: frozenset[str] = frozenset(get_args(TaskStatus))
 
 @dataclass(frozen=True, slots=True)
 class Task:
-    """One TodoWrite task: a short ``content`` description with a tracked ``status`` (ADR-0002 §7).
+    """One TodoWrite task: a short ``content`` description with a tracked ``status`` (ADR-001 §7).
 
     ``id`` is a model-supplied identifier (a short string the model picks, e.g. ``"1"``); ``content``
     is the human-readable task description; ``status`` is one of ``pending`` / ``in_progress`` /

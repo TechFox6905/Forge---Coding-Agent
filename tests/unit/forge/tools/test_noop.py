@@ -1,6 +1,6 @@
 """Unit tests for the trivial gated ``noop`` tool (``support.noop_helper``).
 
-ADR-0002 §3,7: ``noop`` is the *one* gated tool task 005 ships to exercise the whole
+ADR-001 §3,7: ``noop`` is the *one* gated tool task 005 ships to exercise the whole
 permission-gate-via-deferred-tools path end to end (real file/bash tools are 006-008). It
 echoes its input but **requires approval**: it raises
 :class:`pydantic_ai.ApprovalRequired` whenever the run context has not been approved, which

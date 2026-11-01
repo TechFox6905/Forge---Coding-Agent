@@ -1,8 +1,8 @@
-"""The gated ``bash`` tool — run a shell command under the executor seam (ADR-0002 §7,10).
+"""The gated ``bash`` tool — run a shell command under the executor seam (ADR-001 §7,10).
 
 ``bash`` lets the model run a shell command in the working directory and reports the command's
 ``stdout`` / ``stderr``, exit code, and whether it timed out. It is the mutating workhorse, so
-it is **gated** exactly like ``write`` / ``edit`` (ADR-0002 §3): it raises
+it is **gated** exactly like ``write`` / ``edit`` (ADR-001 §3): it raises
 :class:`pydantic_ai.ApprovalRequired` until ``ctx.tool_call_approved`` is set, so the first leg
 defers to the permission gate and a human approves *every* call. There is **no
 dangerous-command classifier in v1** — the human-in-the-loop approval *is* the safety gate (an
@@ -52,7 +52,7 @@ async def bash(
     command: str,
     timeout: float | None = None,
 ) -> str:
-    """Run a shell ``command`` in the working directory and report its result (ADR-0002 §7).
+    """Run a shell ``command`` in the working directory and report its result (ADR-001 §7).
 
     ``command`` runs through a shell (pipes, redirects, ``&&`` all work) under
     ``ctx.deps.cwd``. ``timeout`` is an optional wall-clock limit in seconds; it defaults to
@@ -61,7 +61,7 @@ async def bash(
     stream (truncated to 2000 lines / 50 KB with the full content spilled to a temp-file path on
     overflow).
 
-    Gated (ADR-0002 §3): raises :class:`pydantic_ai.ApprovalRequired` until the call is
+    Gated (ADR-001 §3): raises :class:`pydantic_ai.ApprovalRequired` until the call is
     approved — and *before* the command runs — so a denied call never executes anything.
     Returns a model-readable :class:`pydantic_ai.ModelRetry` for an empty command or a
     non-positive ``timeout`` so the model can correct itself instead of crashing the REPL.

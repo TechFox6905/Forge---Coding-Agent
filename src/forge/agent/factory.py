@@ -1,4 +1,4 @@
-"""Build the ``forge`` Pydantic AI agent on Gemini (ADR-0002 §1-2).
+"""Build the ``forge`` Pydantic AI agent on Gemini (ADR-001 §1-2).
 
 The factory is the **provider-swap seam**: M1 wires Gemini via the ``google-gla`` API-key
 path; M2 swaps in OpenRouter / Modal here without touching the loop. It is intentionally
@@ -50,7 +50,7 @@ _BASE_INSTRUCTIONS = (
 
 
 def build_agent() -> Agent[AgentDeps, str | DeferredToolRequests]:
-    """Construct the Gemini agent and register the flat tool set (ADR-0002 §1-3,7).
+    """Construct the Gemini agent and register the flat tool set (ADR-001 §1-3,7).
 
     The model id comes from ``settings.gemini_model`` and the API key from
     ``settings.gemini_api_key`` (both config-driven). ``deps_type=AgentDeps`` is what the
@@ -75,7 +75,7 @@ def build_agent() -> Agent[AgentDeps, str | DeferredToolRequests]:
 
 
 def _register_memory_instructions(agent: Agent[AgentDeps, str | DeferredToolRequests]) -> None:
-    """Append project memory to the prompt via a **dynamic** instructions hook (ADR-0002 §8).
+    """Append project memory to the prompt via a **dynamic** instructions hook (ADR-001 §8).
 
     ``@agent.instructions`` registers a function Pydantic AI calls **per run, at prompt-build
     time** (confirmed against pydantic-ai 1.107: the decorator takes a sync/async function

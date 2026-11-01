@@ -1,11 +1,11 @@
 """The interactive REPL: a persistent input line + append-style Rich output.
 
-ADR-0002 §6: input is a concurrent ``prompt_async()`` wrapped in ``patch_stdout()`` so any
+ADR-001 §6: input is a concurrent ``prompt_async()`` wrapped in ``patch_stdout()`` so any
 output written while the user is typing scrolls *above* the prompt instead of corrupting
 it (the prompt stays pinned). Output is append-style -- no full-screen renderer -- and the
 harness streams :mod:`forge.entities.events` to :func:`forge.tui.render.render_event`.
 
-Input routing (ADR-0002 §4-5), via :meth:`forge.harness.runner.Runner.submit`. There is
+Input routing (ADR-001 §4-5), via :meth:`forge.harness.runner.Runner.submit`. There is
 **one** input surface (the main ``prompt_async()``); it has two modes:
 
 * **normal** — the default. idle ``Enter`` -> starts a new turn; plain ``Enter`` while busy
@@ -75,12 +75,12 @@ _PERMISSION_AFFORDANCE = "allow this tool call? [y/N]"
 # by the tool's AskUserRequested event, so this is only the "type your answer" cue (any line is
 # the answer — no parsing, unlike the permission y/N).
 _ASK_USER_AFFORDANCE = "type your answer:"
-# Answers that count as "yes"; everything else denies (the safe default — ADR-0002 §3).
+# Answers that count as "yes"; everything else denies (the safe default — ADR-001 §3).
 _AFFIRMATIVE_ANSWERS = frozenset({"y", "yes", "a", "allow"})
 
 
 class InputIntent(enum.Enum):
-    """What the user signalled with the line they just submitted (ADR-0002 §4-5).
+    """What the user signalled with the line they just submitted (ADR-001 §4-5).
 
     ``STEER`` is plain ``Enter`` (start a turn when idle, steer when busy); ``FOLLOW_UP`` is
     ``Alt+Enter``; ``ABORT`` is ``Esc``. The runner maps ``STEER``/``FOLLOW_UP`` onto the two
@@ -108,7 +108,7 @@ def footer_hint() -> str:
 
 
 def parse_permission_answer(answer: str) -> PermissionDecision:
-    """Map a typed allow/deny answer to a :class:`PermissionDecision` (ADR-0002 §3).
+    """Map a typed allow/deny answer to a :class:`PermissionDecision` (ADR-001 §3).
 
     ``y`` / ``yes`` / ``a`` / ``allow`` (case-insensitive) allow; **anything else denies** —
     the safe default. A denial carries a human-facing reason that is fed back to the model.
@@ -121,7 +121,7 @@ def parse_permission_answer(answer: str) -> PermissionDecision:
 
 
 async def deny_permission_resolver(request: PermissionRequest) -> PermissionDecision:
-    """The safe headless default: deny every tool call (ADR-0002 §3).
+    """The safe headless default: deny every tool call (ADR-001 §3).
 
     Used when there is no interactive terminal to ask. Denying (rather than allowing) is the
     safe default — an unattended run never executes a gated side effect.
@@ -215,7 +215,7 @@ def _interpret(submitted: object) -> tuple[InputIntent, str]:
 
 
 def _load_resume_history(resume: str | None, console: Console) -> list[ModelMessage]:
-    """Replay the requested session into a seed ``message_history`` (ADR-0002 §9, task 014).
+    """Replay the requested session into a seed ``message_history`` (ADR-001 §9, task 014).
 
     ``None`` → no resume, a fresh conversation (empty history). ``"latest"`` (the bare
     ``--resume`` flag) → the most recent session under ``settings.sessions_dir``; any other
@@ -287,7 +287,7 @@ async def run_app(console: Console | None = None, *, resume: str | None = None) 
     loop behind the turn-handler seam; gated tool calls (task 005) pause the turn, surface a
     permission prompt via :func:`_make_permission_resolver`, and resume on the answer.
 
-    ``resume`` wires ``forge --resume`` (ADR-0002 §9): ``"latest"`` (the bare flag) replays the
+    ``resume`` wires ``forge --resume`` (ADR-001 §9): ``"latest"`` (the bare flag) replays the
     most recent session, a session id / filename replays that specific one, and ``None`` (the
     default) starts fresh. The replayed history seeds the turn handler so the conversation
     continues; if there is nothing to resume the user is told so and a fresh session starts.
@@ -311,7 +311,7 @@ async def run_app(console: Console | None = None, *, resume: str | None = None) 
 
     # The agent loop is the turn handler: build the Gemini agent, bind the event sink so
     # streamed deltas reach the renderer, the gate (policy) + the interactive allow/deny
-    # resolver (ADR-0002 §3) and the interactive ask_user resolver (§2,7). Both resolvers await
+    # resolver (ADR-001 §3) and the interactive ask_user resolver (§2,7). Both resolvers await
     # on the SAME decision channel — the single mid-turn HITL surface — so a permission ask and
     # an ask_user question can never collide (the channel is single-flight). One handler per
     # session carries history (§1).
@@ -324,7 +324,7 @@ async def run_app(console: Console | None = None, *, resume: str | None = None) 
         resolve_permission=_make_permission_resolver(decisions, console),
         resolve_user_question=_make_user_question_resolver(decisions, console),
     )
-    # Persistence (ADR-0002 §9): replay a prior session if asked, then open a fresh append-only
+    # Persistence (ADR-001 §9): replay a prior session if asked, then open a fresh append-only
     # JSONL log this run writes its turns to. The replayed history seeds the handler so the
     # conversation continues; the new log starts after the replayed prefix (already-persisted).
     resumed_history = _load_resume_history(resume, console)
@@ -381,7 +381,7 @@ async def run_app(console: Console | None = None, *, resume: str | None = None) 
     decisions.cancel()
     await runner.wait_idle()
 
-    # On-exit memory write-back (ADR-0002 §8): one cheap Gemini call summarizes the session into
+    # On-exit memory write-back (ADR-001 §8): one cheap Gemini call summarizes the session into
     # a dated line appended to the project-root MEMORY.md, picked up next session by
     # assemble_memory. The accumulated conversation lives on the handler; ``deps.cwd`` is the
     # project root. Fully non-fatal — extract_on_exit never raises, so it cannot block exit.

@@ -1,4 +1,4 @@
-"""Project memory: read ``AGENTS.md`` / ``MEMORY.md`` and inject them into the prompt (ADR-0002 §8).
+"""Project memory: read ``AGENTS.md`` / ``MEMORY.md`` and inject them into the prompt (ADR-001 §8).
 
 Two pure-ish modules, no agent dependency:
 

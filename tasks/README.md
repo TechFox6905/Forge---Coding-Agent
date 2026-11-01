@@ -34,18 +34,3 @@ One atomic, independently-shippable unit of work (1–2 sentences).
 
 ## Out of scope
 - ...
-
-## Log
-### [PA] 2026-06-19 12:30 — Grooming
-...
-```
-
-## Lifecycle
-
-- **PA** grooming writes the file with `status: pending`.
-- **SWE** starts it → `status: in-progress`.
-- After the **Tester** PASSES and the task is committed → `status: done`.
-
-Every agent **appends** (never rewrites) a timestamped entry to `## Log`: `### [ROLE] YYYY-MM-DD HH:MM — subject`. Roles: `PA`, `SWE`, `Tester`, `PR Reviewer`, `On-Call`.
-
-Tasks are created and driven by the squid pipelines (`/plan`, `/implement-task`, `/implement-night`).

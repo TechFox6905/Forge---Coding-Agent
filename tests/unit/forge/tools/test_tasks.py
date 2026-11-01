@@ -1,10 +1,10 @@
 """Unit tests for the gated ``todo_write`` tool (``forge.tools.tasks``).
 
-ADR-0002 §7: ``todo_write`` is the in-memory TodoWrite-style task tool. The model passes the
+ADR-001 §7: ``todo_write`` is the in-memory TodoWrite-style task tool. The model passes the
 *full desired list* (replace semantics, not incremental ops); the tool validates each item via
 :class:`~forge.entities.task.Task`, replaces ``ctx.deps.task_store`` **in place**, and emits a
 :class:`~forge.entities.events.TaskListUpdated` event so the TUI redraws the checklist. It is
-gated like every mutating tool (ADR-0002 §3): it raises :class:`pydantic_ai.ApprovalRequired`
+gated like every mutating tool (ADR-001 §3): it raises :class:`pydantic_ai.ApprovalRequired`
 until the call is approved.
 
 These tests pin the tool's two states (unapproved -> raises; approved -> rewrites the store +

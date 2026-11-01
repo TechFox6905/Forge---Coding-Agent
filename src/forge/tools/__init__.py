@@ -1,4 +1,4 @@
-"""Tools the model calls (flat registry; ADR-0002 §7).
+"""Tools the model calls (flat registry; ADR-001 §7).
 
 The tool catalogue lives in :mod:`forge.tools.registry` as a flat list of specs — one per
 tool — with no plugin machinery (MCP is M12). M1's production tools are ``read`` / ``glob`` /
