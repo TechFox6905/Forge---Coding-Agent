@@ -33,3 +33,26 @@ def _no_real_provider_key(monkeypatch):
     from forge.config.settings import settings
 
     monkeypatch.setattr(settings, "gemini_api_key", SecretStr(""), raising=False)
+
+
+@pytest.fixture(autouse=True)
+def _no_opik_tracing(monkeypatch):
+    """Hermeticity guard — no test may configure real Opik export (ADR-002 §7, task 016).
+
+    ``forge.config.settings.settings`` is built at import time and may have loaded a real
+    ``OPIK_API_KEY`` from a developer's local ``.env``. Once :func:`forge.observability.init_tracing`
+    is wired into ``run_app`` , that key would make the suite configure
+    a live OTLP exporter to Comet on the first turn/run — a real network side effect. Mirroring
+    :func:`_no_real_provider_key`, we delete the env var and blank the singleton's key so
+    ``init_tracing()`` no-ops everywhere.
+
+    Span-asserting tracing tests opt in with their own fake key + ``logfire.testing``'s in-memory
+    exporter (which wins, running after this conftest fixture) and reset the module flag via
+    ``reset_tracing()`` themselves. Kept separate from the settings-block tests, which build explicit
+    ``Settings(_env_file=…)`` objects untouched by this singleton blanking.
+    """
+    monkeypatch.delenv("OPIK_API_KEY", raising=False)
+
+    from forge.config.settings import settings
+
+    monkeypatch.setattr(settings, "opik_api_key", SecretStr(""), raising=False)

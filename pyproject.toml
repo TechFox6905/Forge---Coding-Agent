@@ -29,6 +29,7 @@ dependencies = [
     "pydantic-ai>=1.107.0",
     "httpx>=0.28.1",
     "markdownify>=1.2.2",
+    "logfire>=4.37.0",
 ]
 
 [project.scripts]
@@ -81,6 +82,6 @@ addopts = "-ra --strict-markers --import-mode=importlib"
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 # ``tests/support`` carries shared test-only helpers (e.g. the gated ``noop`` tool the
-# permission/loop/e2e tests drive) that the shipped ``decode`` package must not contain.
+# permission/loop/e2e tests drive) that the shipped ``forge`` package must not contain.
 pythonpath = ["src", "tests"]
 filterwarnings = ["error"]

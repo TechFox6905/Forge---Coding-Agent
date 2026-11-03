@@ -63,13 +63,18 @@ def _utc_now() -> datetime:
 
 @dataclass(slots=True)
 class SessionLog:
-    """The writer side of a session's JSONL log: open once, append per turn (ADR-001 §9).
-
-    Constructed via :meth:`create` (which writes the header); thereafter :meth:`append_turn`
-    appends one typed ``messages`` line per turn. ``path`` is the file it owns.
-    """
+    """Writer side of a session's JSONL log: open once via :meth:`create`, append per turn."""
 
     path: Path
+
+    @property
+    def session_id(self) -> str:
+        """The session id embedded in the log filename (``<timestamp>_<session_id>.jsonl``).
+
+        Names the session and provides the thread id for Opik tracing (ADR-002 §4). The
+        timestamp format carries no ``_``, so the id is the stem's segment after the first ``_``.
+        """
+        return self.path.stem.split("_", 1)[-1]
 
     @classmethod
     def create(
@@ -82,13 +87,8 @@ class SessionLog:
     ) -> SessionLog:
         """Open a fresh session file under ``sessions_dir`` and write the typed header (§9).
 
-        Creates ``sessions_dir`` (and parents) if absent, derives the filename from ``now`` and
-        ``session_id`` (both injected so tests are deterministic; defaults are the production
-        clock + a random uuid), and writes **line 0**: a typed ``session`` object carrying the
-        schema ``version``, the ``session_id``, the launch ``cwd``, and the UTC ``created_at``.
-
-        ``now`` **must be timezone-aware UTC** — a naive datetime is rejected, the package-wide
-        boundary rule (ADR-001 §10).
+        ``now`` / ``session_id`` are injected for deterministic tests (defaults: production
+        clock + a random uuid). ``now`` must be timezone-aware UTC — naive is rejected.
         """
         resolved_now = now or _utc_now()
         if resolved_now.tzinfo is None:

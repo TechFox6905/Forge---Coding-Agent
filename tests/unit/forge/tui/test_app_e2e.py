@@ -141,9 +141,21 @@ async def _drive_run_app(
     return buf.getvalue()
 
 
+def _visible(text: str) -> str:
+    """Collapse all whitespace runs to single spaces so a needle survives Rich's soft-wrapping.
+
+    Rich wraps console output at the ``Console`` width (100 here), inserting newlines mid-phrase — so a
+    long line (e.g. a degrade message embedding a long ``tmp_path``) can split ``empty workspace`` into
+    ``empty`` + newline + ``workspace``. A raw substring check then never matches, environment-specific
+    on ``tmp_path`` length. Normalising both sides makes the assertion about *content*, not layout.
+    """
+    return " ".join(text.split())
+
+
 async def _wait_for(buf: io.StringIO, needle: str) -> None:
     """Poll the output buffer until ``needle`` appears (or the surrounding timeout fires)."""
-    while needle not in buf.getvalue():
+    target = _visible(needle)
+    while target not in _visible(buf.getvalue()):
         await asyncio.sleep(0.005)
 
 

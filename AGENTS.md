@@ -1,6 +1,7 @@
 # forge
 
-**forge** is a terminal **coding agent** ("agentic harness") built from scratch, step by step, as an educational open-source course. It is a single Python package, `forge`, exposing a TUI you run in your terminal: a Pydantic AI ReAct loop driving file/bash/web tools, with Gemini inference, ask-on-every-tool permissions, deferred tool execution, mid-turn steering, memory management, and replayable session logs.
+**forge** is a terminal **coding agent** ("agentic harness") built from scratch, step by step, as an educational open-source course. It is a single Python package, `forge`, exposing a TUI you run in your terminal: a Pydantic AI ReAct loop driving file/bash/web tools, with Gemini inference, ask-on-every-tool permissions, deferred tool execution, mid-turn steering, memory management, replayable session logs, and Opik observability.
+
 Standalone single-package Python (`cli-tool-python` shape); the TUI is a module inside the package (`prompt_toolkit` input + `Rich` output), not a separate service.
 
 # Key Components
@@ -13,7 +14,7 @@ Single package — one bullet for the package, then the internal module map unde
 
 # Project Structure
 
-The implemented M1 architecture.
+The implemented M1 architecture and Opik observability integration.
 
 `tests/` mirrors `src/` 1:1.
 
@@ -38,7 +39,6 @@ The implemented M1 architecture.
     ├── tui/                       # input: prompt_toolkit · output: Rich (answers via SSE)
     ├── harness/                   # message Queue + Priority Gate around the loop
     ├── agent/                     # Pydantic-AI ReAct loop (LLM ⇄ Tools)
-  
     ├── tools/                     # file I/O, Bash, web, tasks, MCP factory, skill dispatcher, LSP, AskUser
     ├── permissions/               # allow/ask/deny · modes (default/plan/edit/bypass) · settings.json
     ├── context/                   # context engineering: compaction + conversation log (SQLite)
@@ -64,6 +64,7 @@ Single Python toolchain — `uv`, `ruff`, `pytest`.
 | CLI / TUI           | `click` · `prompt_toolkit` · `rich` | Click wrapper is thin; logic stays in the application layer.                     |
 | Agent loop          | `pydantic-ai`                       | ReAct loop using `agent.iter()` and deferred tool execution.                     |
 | Inference           | Gemini                              | Configured through Pydantic AI's `google-gla:` provider.                         |
+| Observability       | `logfire` + OpenTelemetry + Opik    | Global Pydantic AI instrumentation; traces exported to Opik over OTLP.           |
 | Memory              | `AGENTS.md` + `MEMORY.md`           | Instruction loading and minimal session-summary write-back.                      |
 | Session persistence | JSONL                               | Append-only session log with Pydantic AI message serialization.                  |
 
@@ -77,6 +78,9 @@ Use the `context7` MCP server (when connected) to look up authoritative usage fo
 
 * **Pydantic AI:** https://pydantic.dev/docs/ai/llms.txt
 * **Gemini:** https://ai.google.dev/gemini-api/docs
+* **Logfire:** https://logfire.pydantic.dev/docs/
+* **OpenTelemetry:** https://opentelemetry.io/docs/
+* **Opik:** https://www.comet.com/docs/opik/
 
 # Running commands
 
@@ -110,6 +114,15 @@ Access infrastructure through documented CLI commands and SDKs.
 * **Git / GitHub:** `git`; `gh` for PRs, issues, and Actions logs.
 
 * **Gemini** — primary LLM provider through Pydantic AI's `google-gla:` configuration. API credentials are read from `GEMINI_API_KEY`. Model selection is configurable through `settings.gemini_model`.
+
+* **Opik** — LLM observability backend. Logfire instruments Pydantic AI globally and exports OpenTelemetry traces through OTLP. Configure using:
+
+  * `OPIK_API_KEY`
+  * `OPIK_WORKSPACE`
+  * `OPIK_PROJECT_NAME`
+  * `OPIK_URL_OVERRIDE` (optional self-hosted endpoint)
+
+  Tracing is enabled when `OPIK_API_KEY` is configured. Without the key, initialization is a silent no-op.
 
 # Key Principles You Will Respect All Over Your Work
 
@@ -184,6 +197,8 @@ Project-specific invariants:
 
 * **Memory is intentionally minimal.** Preserve the existing AGENTS.md/MEMORY.md loading and summary write-back approach. Do not introduce compaction or a different memory architecture without an ADR.
 
+* **Observability is optional.** When `OPIK_API_KEY` is absent, `init_tracing()` must remain a silent no-op with no exported spans or additional output.
+
 * **One trace represents one complete REPL turn.** The root `chat_turn` span must cover the entire lifecycle, including deferred approval and resume.
 
 * **Use settings-driven telemetry configuration.** Do not configure global `OTEL_*` environment variables or introduce additional tracing providers without an ADR.
@@ -202,7 +217,7 @@ Run it with `make integration-tests` (or the full gate, `make ci`).
 
 It requires no API key and makes no network call.
 
-What follows is the manual E2E pass against real Gemini.
+What follows is the manual E2E pass against real Gemini and, optionally, Opik.
 
 **Launch.** One environment variable, no external service to start first:
 
@@ -229,6 +244,23 @@ For each surface below: the thing to type, and what working looks like.
 | Todo checklist  | `make a 3-step plan to add a CLI flag`                                                              | Tasks panel renders and updates as the model changes task statuses.                                                                                                 |
 | Web fetch       | `fetch https://example.com and summarize it`                                                        | Permission prompt appears; HTML is converted to Markdown and summarized.                                                                                            |
 | AskUser         | `deploy my app`                                                                                     | The agent asks a clarifying question and resumes after receiving the answer.                                                                                        |
+| Opik tracing    | Configure `OPIK_API_KEY`, optionally `OPIK_WORKSPACE` and `OPIK_PROJECT_NAME=forge`, then relaunch. | Each REPL turn produces a trace containing model requests, tool calls, and approval/resume operations. Traces are grouped into a Thread using the Forge session ID. |
+
+**Opik tracing (observability).**
+
+When enabled, Forge exports OpenTelemetry traces to Opik through Logfire.
+
+* One root `chat_turn` trace represents one complete REPL turn.
+* Model requests and tool calls appear as nested spans.
+* Deferred approval and resume operations remain within the same turn.
+* Pydantic AI instrumentation captures model inputs, outputs, latency, and token usage.
+* Memory write-back uses the same global instrumentation.
+* Opik calculates costs server-side for supported models.
+* When `OPIK_API_KEY` is unset, tracing is a silent no-op with no network requests or additional output.
+
+Configuration is settings-driven. Do not introduce global `OTEL_*` environment variables.
+
+Instrumentation tests use `logfire.testing` and an in-memory exporter; they do not require credentials or network access.
 
 **Mid-turn interaction** (ADR-001 §4-5):
 

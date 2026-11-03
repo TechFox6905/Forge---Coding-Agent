@@ -44,6 +44,7 @@ from pydantic_ai.messages import ModelMessage
 from rich.console import Console
 from rich.text import Text
 
+from forge import observability
 from forge.agent.deps import AgentDeps, PermissionResolver, UserQuestionResolver
 from forge.agent.factory import build_agent
 from forge.agent.loop import AgentTurnHandler
@@ -300,6 +301,13 @@ async def run_app(console: Console | None = None, *, resume: str | None = None) 
     """
     console = console or Console()
 
+    # Opik tracing (ADR-002 §4-5): configure ONCE, early — before the agent is built, so the global
+    # ``instrument_pydantic_ai`` covers it and every downstream Agent (memory write-back, compaction,
+    # subagents). Presence-based (``OPIK_API_KEY``): a silent no-op returning ``False`` when unset, so a
+    # no-key REPL is byte-identical. The on/off result is captured here; the one startup console line is
+    # emitted near the banner below, where ``emit_line`` (the render path) exists.
+    opik_tracing_active = observability.init_tracing()
+
     # The harness streams events into this sink; it renders append-style above the pinned prompt
     # and owns the once-per-turn ``Forge `` answer prefix (Fix 2 — the pure renderer can't).
     _on_event = _make_event_sink(console)
@@ -324,6 +332,14 @@ async def run_app(console: Console | None = None, *, resume: str | None = None) 
         resolve_permission=_make_permission_resolver(decisions, console),
         resolve_user_question=_make_user_question_resolver(decisions, console),
     )
+
+    # The single input surface (ADR-0003 §9): a confirmation sink that renders one line through the
+    # existing event/render path (no second render surface), plus the Shift+Tab mode-cycle closure
+    # the keybind calls. The bottom toolbar reads ``deps`` / ``gate`` live each render, so the footer
+    # updates the moment a switch lands.
+    def emit_line(text: str) -> None:
+        console.print(render.render_event(events.AssistantTextDelta(text=text)))
+
     # Persistence (ADR-001 §9): replay a prior session if asked, then open a fresh append-only
     # JSONL log this run writes its turns to. The replayed history seeds the handler so the
     # conversation continues; the new log starts after the replayed prefix (already-persisted).
@@ -333,9 +349,21 @@ async def run_app(console: Console | None = None, *, resume: str | None = None) 
     # Hold the handler directly: it owns the cross-turn ``message_history`` the on-exit memory
     # write-back summarizes (the runner keeps it private). One handler per session (§1).
     handler = AgentTurnHandler(
-        agent, deps=deps, session_log=session_log, message_history=resumed_history
+        agent,
+        deps=deps,
+        session_log=session_log,
+        # The Opik Thread id for this session's per-turn root spans (ADR-002 §4): the session-log id
+        # groups every turn's ``chat_turn`` trace under one conversation thread. Inert when tracing is off.
+        session_id=session_log.session_id,
+        message_history=resumed_history,
     )
     runner = Runner(handler, on_event=_on_event)
+
+    # One tracing line near the banner when Opik is active (ADR-002 §1,4), styled like the sandbox
+    # lines and naming the configured project. Emitted through the render path (never ``print``); a
+    # no-op when tracing is off, so a no-key launch is byte-identical.
+    if opik_tracing_active:
+        emit_line(f"Forge - Opik tracing on (project '{settings.opik_project_name}').")
 
     console.print(
         render.render_event(events.AssistantTextDelta(text="Forge - type a line; /quit exits."))
