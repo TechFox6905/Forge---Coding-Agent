@@ -18,6 +18,7 @@ Forge goes beyond a basic LLM wrapper by combining tool orchestration with expli
 - **Task checklist:** Provides a tool for organizing multi-step work.
 - **Testable agent behavior:** Uses Pydantic AI's `TestModel` and `FunctionModel` to test agent behavior without live model requests.
 - **Developer workflow:** Includes formatting, linting, automated tests, and CI commands.
+- **Agent evaluation:** Includes an initial benchmark suite and behavioral regression probes to assess task completion and agent behavior.
 
 ## Architecture
 
@@ -26,7 +27,6 @@ The current implementation separates the terminal interface, turn lifecycle, age
 <p align="center">
   <img src="docs/diagrams/core-agent-architecture.svg" alt="Architecture" width="800">
 </p>
-
 
 ### Execution flow
 
@@ -111,11 +111,9 @@ Project memory provides concise context for later sessions, while session histor
 
 ### 1. Clone the repository
 
-Replace `YOUR_USERNAME` with your GitHub username and `forge` with the repository name if different.
-
 ```bash
-git clone https://github.com/YOUR_USERNAME/forge.git
-cd forge
+git clone https://github.com/TechFox6905/Forge---Coding-Agent.git
+cd Forge---Coding-Agent
 ```
 
 If you use SSH for GitHub, you can use the SSH clone URL instead.
@@ -137,7 +135,13 @@ uv sync
 Create a local environment file:
 
 ```bash
-cp .env.example .env
+copy .env.example .env # Windows CMD
+```
+
+Alternatively,
+
+```bash
+cp .env.example .env  # Linux/macOS/Git Bash
 ```
 
 Set your API key in `.env`:
@@ -151,6 +155,44 @@ GEMINI_MODEL=gemini-2.5-flash
 Check `.env.example` and the application configuration for the exact supported variable names and defaults. Keep `.env` out of version control.
 
 > **Windows note:** `cp` is available in Git Bash and many Unix-like shells. In PowerShell, use `Copy-Item .env.example .env`.
+
+### Optional: Configure Observability and Evaluation
+
+Forge supports optional Opik tracing and LLM-as-a-judge evaluation. These integrations are disabled by default and can be enabled by adding the relevant keys to `.env`.
+
+**1. Opik Observability**
+
+To enable agent tracing in [Opik](https://www.comet.com/site/products/opik/), uncomment and configure:
+
+```dotenv
+OPIK_API_KEY=your-opik-api-key
+OPIK_WORKSPACE=default
+OPIK_PROJECT_NAME=forge
+```
+
+Optional: For a self-hosted Opik instance, configure the OTLP base URL:
+
+```dotenv
+OPIK_URL_OVERRIDE=http://localhost:5173/api/v1/private/otel
+```
+
+When `OPIK_API_KEY` is unset, tracing remains disabled and Forge makes no tracing network calls.
+
+**2. Evaluation**
+
+To run the evaluation suite with Groq as the LLM judge, configure:
+
+```dotenv
+GROQ_API_KEY=your-groq-api-key
+EVAL_JUDGE_MODEL=groq/openai/gpt-oss-120b
+EVAL_PROJECT_NAME=forge-evals
+```
+
+- `GROQ_API_KEY`: Authenticates requests to Groq for evaluation judging.
+- `EVAL_JUDGE_MODEL`: Specifies the model used for evaluation judging.
+- `EVAL_PROJECT_NAME`: Sets the Opik project name for evaluation results.
+
+**Note:** These integrations are optional. Forge's core agent functionality does not require Opik or Groq evaluation credentials. Keep these variables unset if you do not need observability or LLM-based evaluation.
 
 ### 4. Run Forge
 
@@ -254,11 +296,42 @@ Tracing is presence-based. It activates only when `OPIK_API_KEY` is provided:
 - **Root input and output:** The user's prompt is recorded on the root span's `input` attribute, and the final assistant response is recorded on its `output` attribute, ensuring conversation messages render cleanly in Opik Threads.
 - **Tokens and cost:** LLM spans capture standard OpenTelemetry GenAI semantic convention attributes (`gen_ai.usage.*`). Opik calculates cost server-side for supported model pricing (e.g. Gemini).
 - **Global instrumentation:** Tracing uses Logfire's `instrument_pydantic_ai()` globally, automatically capturing agent turns and memory write-back without per-call-site wiring.
-- **Evaluation:** Tracing establishes the observational foundation; evaluation datasets, automated scoring, and experiment tracking belong to a future milestone.
+- **Evaluation:** Forge has an initial benchmark suite and behavioral regression probes. Evaluation results are summarized below; expanding coverage and improving the evaluation workflow remain future work.
+
+### Evaluation
+
+Forge's initial evaluation suite covers two complementary areas:
+
+- **Benchmark:** 20 coding tasks, from `001-find-and-replace` through `020-build-small-tool`. Each task is checked against an oracle (`verify_oracle`) and a task-specific step limit (`max_steps`).
+- **Regression:** 15 focused probes covering tool selection, edit precision, web-fetch discipline, task planning, step efficiency, permission handling, memory obedience, grounded answers, and output contracts. The suite includes tool-call assertions, file-state checks, permission-denial checks, and G-Eval scoring.
+
+#### Recorded Results
+
+The following results are from the two supplied evaluation runs.
+
+| Suite | Run | Checks passed | Result |
+|---|---:|---|---:|
+| Benchmark | 1 | Oracle: 20/20; step limit: 20/20 | 100% on both checks |
+| Benchmark | 2 | Oracle: 20/20; step limit: 20/20 | 100% on both checks |
+| Regression | 1 | Step-limit probes: 13/15 | 86.7% |
+| Regression | 2 | Step-limit probes: 13/15 | 86.7% |
+
+Across the benchmark runs, all 20 tasks passed oracle verification and stayed within their configured step limits. Average steps decreased from **8.25** in Run 1 to **7.30** in Run 2.
+
+Across both regression runs, the non-step-budget assertions passed, including the recorded G-Eval checks (7/7 per run). However, the same two probes exceeded their configured step limits in both runs:
+
+| Probe | Observed steps | Maximum steps |
+|---|---:|---:|
+| `08-todo-planning` | 7 | 6 |
+| `15-memory-obedience` | 6 | 5 |
+
+Regression runs averaged 3.60 and 3.67 steps respectively.
+
+These results demonstrate repeatability on the supplied benchmark and regression datasets. They should not be interpreted as a guarantee of general agent reliability or performance across arbitrary coding tasks.
 
 ## Current Scope and Future Work
 
-The current implementation focuses on a single-provider terminal coding agent. Implemented capabilities include the Gemini-backed agent loop, terminal UI, file and shell tools, user approval prompts, project memory, session persistence, session resumption, Opik observability, and automated tests.
+The current implementation focuses on a single-provider terminal coding agent. Implemented capabilities include the Gemini-backed agent loop, terminal UI, file and shell tools, user approval prompts, project memory, session persistence, session resumption, Opik observability, automated tests, and an initial benchmark and regression evaluation suite.
 
 Potential future extensions include:
 
@@ -266,8 +339,13 @@ Potential future extensions include:
 - Sandboxed tool execution.
 - Durable execution for long-running tasks.
 - Model Context Protocol (MCP) integration.
+- **Evaluation improvements:** Resolve the recurring regression step-budget failures in `08-todo-planning` and `15-memory-obedience`.
+- Expand benchmark and regression datasets to cover additional tools, workflows, and failure modes.
+- Track evaluation results across model and configuration changes to identify behavioral regressions.
+- Improve evaluation documentation, dataset versioning, and scoring configuration.
+- Integrate repeatable evaluation runs into CI.
 
-These are future directions, not claims about the current implementation.
+These are future directions, not claims about the current implementation. The initial evaluation results above represent the current recorded baseline.
 
 ## Project Structure
 
