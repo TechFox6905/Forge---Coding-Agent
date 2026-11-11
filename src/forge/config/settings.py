@@ -40,6 +40,11 @@ class Settings(BaseSettings):
     # ``http://localhost:5173/api/v1/private/otel``. The exporter appends ``/v1/traces``.
     opik_url_override: str | None = None
 
+    # --- Evaluation suite (ADR-003) ---
+    groq_api_key: SecretStr = SecretStr("")
+    eval_judge_model: str = "groq/openai/gpt-oss-120b"
+    eval_project_name: str = "forge-evals"
+
     # --- Tool execution / output truncation (tasks 006/008/010) ---
     bash_timeout_s: float = 120.0
     max_output_lines: int = 2000

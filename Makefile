@@ -47,8 +47,16 @@ ci:  ## What CI runs: lockfile check + format-check + lint-check + full tests.
 	$(MAKE) lint-check
 	$(MAKE) test
 
+eval-benchmark:  ## Run the outcome benchmark across all tasks (requires keys).
+	uv run python -m evals.harness.keys
+	uv run python -m evals benchmark
+
+eval-regression:  ## Run the behavior regression threshold gate (requires keys).
+	uv run python -m evals.harness.keys
+	uv run pytest evals/regression/test_thresholds.py
+
 help:  ## Show this help.
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
 		awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-.PHONY: install test unit-tests integration-tests lint-check lint-fix format-check format-fix pre-commit build install-cli uninstall-cli ci help
+.PHONY: install test unit-tests integration-tests lint-check lint-fix format-check format-fix pre-commit build install-cli uninstall-cli ci eval-benchmark eval-regression help

@@ -165,13 +165,10 @@ class AgentTurnHandler:
                     if prompt is None:
                         # Nothing to ask the model: stop cleanly (drain follow-up below).
                         output = ""
-                        self._persist_turn()
-                        follow_ups = yield Boundary.WOULD_STOP
-                        if not follow_ups:
-                            return
-                        next_prompt = "\n".join(follow_ups)
-                        continue
-                    output = await self._run_leg(ctx, prompt=prompt)
+                        model_executed = False
+                    else:
+                        output = await self._run_leg(ctx, prompt=prompt)
+                        model_executed = True
 
                 if isinstance(output, DeferredToolRequests):
                     # A gated tool paused the run: resolve approvals and loop back to resume.
@@ -182,7 +179,8 @@ class AgentTurnHandler:
                 self._persist_turn()
                 # Record the final assistant text as the root span's output (ADR-002 §4) so Opik shows
                 # it on the trace + Thread; overwritten by a later leg if a follow-up continues the turn.
-                observability.record_output(span, output)
+                if model_executed:
+                    observability.record_output(span, output)
                 follow_ups = yield Boundary.WOULD_STOP
                 if not follow_ups:
                     return

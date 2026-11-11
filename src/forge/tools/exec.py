@@ -25,6 +25,8 @@ import os
 import shutil
 import signal
 import subprocess
+import sys
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
@@ -38,6 +40,34 @@ _KILL_GRACE_S = 2.0
 _IS_WINDOWS = os.name == "nt"
 
 
+def _ensure_windows_shims() -> Path:
+    """Ensure Windows compatibility shims (e.g. python3) exist in a dedicated directory.
+
+    On Windows, python3 is typically not present in virtual environments or standard Python
+    installations, leaving the Microsoft Store execution alias on PATH which exits with code 49.
+    This provides shims forwarding python3 to sys.executable.
+    """
+    shim_dir = Path(tempfile.gettempdir()) / "forge-shims"
+    shim_dir.mkdir(parents=True, exist_ok=True)
+
+    py_exe = sys.executable
+    py_posix = py_exe.replace("\\", "/")
+
+    # bash shim for Git Bash
+    bash_shim = shim_dir / "python3"
+    expected_bash = f'#!/bin/sh\nexec "{py_posix}" "$@"\n'
+    if not bash_shim.exists() or bash_shim.read_text(encoding="utf-8") != expected_bash:
+        bash_shim.write_text(expected_bash, encoding="utf-8")
+
+    # cmd shim for Windows cmd/subprocesses
+    cmd_shim = shim_dir / "python3.cmd"
+    expected_cmd = f'@echo off\n"{py_exe}" %*\n'
+    if not cmd_shim.exists() or cmd_shim.read_text(encoding="utf-8") != expected_cmd:
+        cmd_shim.write_text(expected_cmd, encoding="utf-8")
+
+    return shim_dir
+
+
 def _find_bash() -> str:
     """Find the Bash executable used to execute commands.
 
@@ -46,6 +76,11 @@ def _find_bash() -> str:
     candidates: list[str] = []
 
     if _IS_WINDOWS:
+        shim_dir = _ensure_windows_shims()
+        current_path = os.environ.get("PATH", "")
+        if str(shim_dir) not in current_path:
+            os.environ["PATH"] = f"{shim_dir}{os.pathsep}{current_path}"
+
         git = shutil.which("git")
         if git:
             git_root = Path(git).parent.parent
@@ -134,8 +169,13 @@ class LocalExecutor:
         executable = _find_bash()
 
         process_options: dict[str, object] = {}
+        env = dict(os.environ)
         if _IS_WINDOWS:
             process_options["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+            shim_dir = _ensure_windows_shims()
+            current_path = env.get("PATH", "")
+            if str(shim_dir) not in current_path:
+                env["PATH"] = f"{shim_dir}{os.pathsep}{current_path}"
         else:
             process_options["start_new_session"] = True
 
@@ -148,6 +188,7 @@ class LocalExecutor:
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
             cwd=str(cwd),
+            env=env,
             **process_options,
         )
 

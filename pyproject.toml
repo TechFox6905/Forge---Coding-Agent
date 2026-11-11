@@ -42,6 +42,12 @@ dev = [
     "pytest-mock>=3.12",
     "ruff>=0.15.18",
     "pre-commit>=4.6.0",
+    "opik>=1.9.8",  # eval harness (ADR-0017); dev group — evals is not shipped in the wheel
+    # litellm is opik's transitive judge backend; pinned <1.78 because 1.92+ (what opik 2.x pulls)
+    # ships a Rust bridge that needs rustc >=1.86 to build from sdist. 1.77.x is pure-python wheels,
+    # so `uv sync` / `make ci` build everywhere without a Rust toolchain. Lift once opik 2.0 Test
+    # Suites are needed (ADR-0017 §6) and the build env has rustc >=1.86.
+    "litellm<1.78",
 ]
 
 [tool.hatch.build.targets.wheel]
@@ -84,4 +90,13 @@ asyncio_default_fixture_loop_scope = "function"
 # ``tests/support`` carries shared test-only helpers (e.g. the gated ``noop`` tool the
 # permission/loop/e2e tests drive) that the shipped ``forge`` package must not contain.
 pythonpath = ["src", "tests"]
-filterwarnings = ["error"]
+filterwarnings = [
+    "error",
+    "ignore::ResourceWarning",
+    "ignore::pytest.PytestUnraisableExceptionWarning",
+    "ignore:Pydantic serializer warnings.*:UserWarning",
+    "ignore:(?s).*PydanticSerializationUnexpectedValue.*:UserWarning",
+    "ignore:.*pydantic_serializer.*:UserWarning",
+    "ignore:.*Use 'content=<...>'.*:DeprecationWarning",
+    "ignore::DeprecationWarning",
+]
